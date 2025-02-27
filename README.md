@@ -9,6 +9,6 @@ It is located at the top right of the top bar on the server.
 It retrieves the time and date from the user's device.
 
 Installation instructions:
-Place the file "klient-klokke-utc.js" and the folder "klient-klokke-utc" with its contents in the plugin folder on the server and restart.
+Place the file "klient-klokke-utc.js" and the folder "klient-klokke-utc" with its contents in the plugin folder on the server and restart the server.
 
 Log in to the admin panel and activate the plugin.
