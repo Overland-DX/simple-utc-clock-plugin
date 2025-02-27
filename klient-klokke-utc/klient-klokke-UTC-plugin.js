@@ -25,7 +25,7 @@ function updateClock() {
     let clockWidget = $('#custom-clock-widget');
 
     if (clockWidget.length === 0) {
-        let tooltipContent = `<span class='text-bold'>${USE_UTC ? 'Klienttid UTC' : 'Lokal tid'}</span>`;
+        let tooltipContent = `<span class='text-bold'>${USE_UTC ? 'Client Time UTC' : 'Local Time'}</span>`;
 
         clockWidget = $(`
             <div id="custom-clock-widget" class="flex-container flex-center tooltip hide-phone hover-brighten br-15"
