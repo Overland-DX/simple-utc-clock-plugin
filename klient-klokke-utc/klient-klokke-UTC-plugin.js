@@ -3,13 +3,15 @@ const USE_UTC = true; // Set to `false` to show local time
 
 // Funksjon for å oppdatere UI med valgt tid
 function updateClock() {
-    const now = new Date(); // Henter tiden fra klientens enhet
-    const time = USE_UTC ? now.toISOString().substring(11, 19) : now.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    let now = new Date($.now()); // Henter klientens tid via jQuery
 
-    // Konverter datoformat til DD.MM.YYYY
-    const dateString = USE_UTC
-        ? now.toISOString().substring(0, 10).split('-').reverse().join('.') + ' UTC'
-        : now.toLocaleDateString('no-NO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    let time = USE_UTC
+        ? now.toISOString().substring(11, 19) // UTC-tid HH:MM:SS
+        : now.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); // Lokal tid
+
+    let dateString = USE_UTC
+        ? now.toISOString().substring(0, 10).split('-').reverse().join('.') + ' UTC' // Dato i UTC (DD.MM.YYYY)
+        : now.toLocaleDateString('no-NO', { day: '2-digit', month: '2-digit', year: 'numeric' }); // Lokal dato (DD.MM.YYYY)
 
     let container = $('.dashboard-panel .panel-100-real .dashboard-panel-plugin-content');
     if (container.length === 0) return;
@@ -43,23 +45,12 @@ function updateClock() {
     }
 
     // 📱 Skjul widget på mobil
-    if (window.innerWidth <= 768) {
-        clockWidget.hide();
-    } else {
-        clockWidget.show();
-    }
+    window.innerWidth <= 768 ? clockWidget.hide() : clockWidget.show();
 }
 
 // 🚀 Start oppdateringsløkken
-document.addEventListener('DOMContentLoaded', () => {
+$(document).ready(() => {
     console.log(`DOM lastet, starter klokke (${USE_UTC ? 'UTC' : 'Lokal tid'})...`);
     updateClock(); // Oppdater umiddelbart
-    setInterval(updateClock, 1000); // 🔄 Oppdater hvert 1. sekund
-});
-
-// 🚀 Start oppdateringsløkken
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM lastet, starter klokke fra klient (UTC)...');
-    updateClock(); // Oppdater umiddelbart
-    setInterval(updateClock, 1000); // 🔄 Oppdater hvert 1. sekund
+    setInterval(updateClock, 1000); // 🔄 Oppdater hvert sekund
 });
