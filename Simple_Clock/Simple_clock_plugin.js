@@ -1,10 +1,10 @@
 // 🔧 Configuration options for the server admin
 const CONFIG = {
-    ALLOW_TIME_SWITCH: false // Set to `false` to disable the ability to switch between UTC and local time
+    ALLOW_TIME_SWITCH: true // Set to `false` to disable the ability to switch between UTC and local time
 };
 
 // 🔧 User can choose whether the clock should display UTC or local time
-let USE_UTC = false; // Set to `false` for local time
+let USE_UTC = true; // Set to `false` for local time
 
 // Function to update the UI with the selected time
 function updateClock() {
