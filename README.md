@@ -1,9 +1,13 @@
 ![bilde](https://github.com/user-attachments/assets/cc8a4022-9d6c-49ae-95f3-0db7d7813b54)
 
 Version 1.1.0:
+
 -The user can now decide for themselves whether to use UTC or local mode by pressing the clock.
+
 -You can disable this option in Simple_clock_plugin.js
+
 -Changed file and folder names to more English friendly.
+
 
 Version 1.0.4:
 - Added user choice in UTC or local time at the top of Simple_clock_plugin.js.
