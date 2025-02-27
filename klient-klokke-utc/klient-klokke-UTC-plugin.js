@@ -1,17 +1,17 @@
-// User can choose whether the clock should display UTC or local time
-const USE_UTC = true; // Set to `false` to show local time
+// 🔧 User can choose whether the clock should display UTC or local time
+const USE_UTC = true; // Set to `false` for local time
 
-// Funksjon for å oppdatere UI med valgt tid
+// Function to update the UI with the selected time
 function updateClock() {
-    let now = new Date($.now()); // Henter klientens tid via jQuery
+    let now = new Date($.now()); // Get client time via jQuery
 
     let time = USE_UTC
-        ? now.toISOString().substring(11, 19) // UTC-tid HH:MM:SS
-        : now.toLocaleTimeString('no-NO', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); // Lokal tid
+        ? now.toISOString().substring(11, 19) // UTC time HH:MM:SS
+        : now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); // Local time
 
     let dateString = USE_UTC
-        ? now.toISOString().substring(0, 10).split('-').reverse().join('.') + ' UTC' // Dato i UTC (DD.MM.YYYY)
-        : now.toLocaleDateString('no-NO', { day: '2-digit', month: '2-digit', year: 'numeric' }); // Lokal dato (DD.MM.YYYY)
+        ? now.toISOString().substring(0, 10).split('-').reverse().join('.') + ' UTC' // Date in UTC (DD.MM.YYYY)
+        : now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // Local date (DD.MM.YYYY)
 
     let container = $('.dashboard-panel .panel-100-real .dashboard-panel-plugin-content');
     if (container.length === 0) return;
@@ -41,16 +41,16 @@ function updateClock() {
     } else {
         clockWidget.find('span:first').text(time);
         clockWidget.find('span:last').text(dateString);
-        clockWidget.attr('data-tooltip', `<span class='text-bold'>${USE_UTC ? 'Klienttid UTC' : 'Lokal tid'}</span>`);
+        clockWidget.attr('data-tooltip', `<span class='text-bold'>${USE_UTC ? 'Client Time UTC' : 'Local Time'}</span>`);
     }
 
-    // 📱 Skjul widget på mobil
+    // 📱 Hide widget on mobile
     window.innerWidth <= 768 ? clockWidget.hide() : clockWidget.show();
 }
 
-// 🚀 Start oppdateringsløkken
+// 🚀 Start update loop
 $(document).ready(() => {
-    console.log(`DOM lastet, starter klokke (${USE_UTC ? 'UTC' : 'Lokal tid'})...`);
-    updateClock(); // Oppdater umiddelbart
-    setInterval(updateClock, 1000); // 🔄 Oppdater hvert sekund
+    console.log(`DOM loaded, starting clock (${USE_UTC ? 'UTC' : 'Local Time'})...`);
+    updateClock(); // Update immediately
+    setInterval(updateClock, 1000); // 🔄 Update every second
 });
