@@ -1,5 +1,14 @@
 ![bilde](https://github.com/user-attachments/assets/cc8a4022-9d6c-49ae-95f3-0db7d7813b54)
 
+Version 1.1.1:
+
+- Added new string for admin controll in Simple_clock_plugin.js ("auto" = Users can switch, "local" = Only local time, "utc" = Only UTC)
+- Fixed state being saved correctly.
+- some cleanup.
+
+If you find any bugs or want to help with the project, let me know here or on Discord.
+
+<br><br>
 Version 1.1.0:
 
 -The user can now decide for themselves whether to use UTC or local mode by pressing the clock.
