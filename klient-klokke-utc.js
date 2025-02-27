@@ -1,7 +1,7 @@
 // Plugin configuration, this is used in the administration when plugins are loaded
 var pluginConfig = {
     name: 'Klient-Klokke-UTC Plugin',
-    version: '1.0.3',
+    version: '1.0.4',
     author: 'ODX',
     frontEndPath: 'klient-klokke-utc/klient-klokke-UTC-plugin.js'
 }
