@@ -1,5 +1,7 @@
 // 🔧 Admin Configuration
 let TIME_MODE = "auto";  // "auto" = Users can switch, "local" = Only local time, "utc" = Only UTC
+let LOCAL_TIMEZONE = "Europe/Oslo";  // 🌍 Set the desired timezone (e.g., "America/New_York")
+let USE_DST = true;  // ⏳ Should daylight saving time be used? true = Yes, false = No
 
 // 🚀 Determine initial UTC value based on admin setting
 let USE_UTC = TIME_MODE === "utc" 
@@ -13,12 +15,22 @@ function updateClock() {
     let now = new Date();
 
     let time = USE_UTC
-        ? now.toISOString().substring(11, 19) // UTC time HH:MM:SS
-        : now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); // Local time
+    ? now.toISOString().substring(11, 19) // UTC time HH:MM:SS
+    : new Intl.DateTimeFormat('en-GB', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit', 
+        timeZone: LOCAL_TIMEZONE
+    }).format(now);
 
     let dateString = USE_UTC
-        ? now.toISOString().substring(0, 10).split('-').reverse().join('.') + ' UTC' // UTC date (DD.MM.YYYY)
-        : now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // Local date (DD.MM.YYYY)
+    ? now.toISOString().substring(0, 10).split('-').reverse().join('.') + ' UTC'
+    : new Intl.DateTimeFormat('en-GB', { 
+        day: '2-digit', 
+        month: '2-digit', 
+        year: 'numeric', 
+        timeZone: LOCAL_TIMEZONE
+    }).format(now) + ' Loc';
 
     let container = $('.dashboard-panel .panel-100-real .dashboard-panel-plugin-content');
     if (!container.length) return;
