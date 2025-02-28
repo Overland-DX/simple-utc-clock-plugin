@@ -41,7 +41,7 @@ function updateClock() {
 
     if (!clockWidget.length) {
         let tooltipContent = TIME_MODE === "auto"
-            ? `<span class='text-bold'>Tap to switch mode</span>`
+            ? `<span class='text-bold'>Click to toggle UTC & local server time</span>`
             : `<span class='text-bold'>${USE_UTC ? 'UTC Time' : 'Local Time'} (Locked)</span>`;
 
         clockWidget = $(`
@@ -59,7 +59,7 @@ function updateClock() {
         clockWidget.find('.clock-time').text(time);
         clockWidget.find('.clock-date').text(dateString);
         clockWidget.attr('data-tooltip', TIME_MODE === "auto"
-            ? `<span class='text-bold'>Tap to switch mode</span>`
+            ? `<span class='text-bold'>Click to toggle UTC & local server time</span>`
             : `<span class='text-bold'>${USE_UTC ? 'UTC Time' : 'Local Time'} (Locked)</span>`);
     }
 
