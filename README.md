@@ -40,6 +40,8 @@ It is located at the top right of the top bar on the server.
 It retrieves the time and date from the user's device.
 
 Installation instructions:
-Place the file "klient-klokke-utc.js" and the folder "klient-klokke-utc" with its contents in the plugin folder on the server and restart the server.
-
-Log in to the admin panel and activate the plugin.
+1. Place the file "Simple_Clock.js" and the folder "Simple_Clock" with its contents in the plugin folder on the server.
+2. Navigate to \plugin\Simple_Clock\ and open Simple_clock_plugin.js with your favorite text editor. Change the values at the top of the code according to your wishes and save the changes.
+3. Restart your server and activate the plugin in Admin Panel.
+<br>
+If you are unsure which time zone you are using, you can find it here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
