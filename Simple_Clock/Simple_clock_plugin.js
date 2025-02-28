@@ -46,7 +46,7 @@ function updateClock() {
 
         clockWidget = $(`
             <div id="custom-clock-widget" class="flex-container flex-center tooltip hide-phone hover-brighten br-15"
-                style="height: 50px; width: 115px; padding: 4px; margin-right: 6px; text-align: center; display: flex; flex-direction: column; gap: 2px; user-select: none;"
+                style="height: 50px; width: 115px; padding: 2px; margin-right: 1px; text-align: center; display: flex; flex-direction: column; gap: 2px; user-select: none;"
                 data-tooltip="${tooltipContent}" data-tooltip-placement="bottom">
                 <span class="color-4 m-0 clock-time" style="font-size: 22px; font-weight: bold; line-height: 22px;">${time}</span>
                 <span class="color-4 m-0 clock-date" style="font-size: 14px; line-height: 14px;">${dateString}</span>
