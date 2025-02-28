@@ -30,7 +30,7 @@ function updateClock() {
         month: '2-digit', 
         year: 'numeric', 
         timeZone: LOCAL_TIMEZONE
-    }).format(now) + ' Loc';
+    }).format(now).replace(/\//g, '.') + ' Loc';
 
     let container = $('.dashboard-panel .panel-100-real .dashboard-panel-plugin-content');
     if (!container.length) return;
