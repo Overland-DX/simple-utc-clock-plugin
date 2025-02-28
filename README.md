@@ -1,4 +1,11 @@
 ![bilde](https://github.com/user-attachments/assets/cc8a4022-9d6c-49ae-95f3-0db7d7813b54)
+<br><br>
+Version 1.1.2 :
+- Added so serverowner can set timezone for local time. (e.g., "America/New_York")
+- Added "Loc" behind the local date since I still haven't gotten the dynamic tooltips to work properly.
+<br>
+Please let me know if it doesn't work for you.
+
 
 Version 1.1.1:
 
