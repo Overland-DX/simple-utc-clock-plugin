@@ -72,10 +72,10 @@ function updateClock() {
             'display': 'flex',
             'align-items': 'center',
             'justify-content': 'flex-start',
-            'gap': '10px'
+            'gap': '2px'
         }).prepend(`
             <div id='custom-clock-widget' class='flex-container flex-center tooltip hide-phone hover-brighten br-15' 
-                style='height: 50px; width: 115px; padding: 2px; margin-right: 1px; text-align: center; display: flex; flex-direction: column; gap: 2px; user-select: none;'
+                style='height: 50px; width: 115px; padding: 2px; margin-right: 0px; text-align: center; display: flex; flex-direction: column; gap: 2px; user-select: none;'
                 data-tooltip='${DISPLAY_MODE === "auto" ? "Click to toggle UTC & local server time" : `${USE_UTC ? 'UTC Time' : 'Local Time'} (Locked)`}'
                 data-tooltip-placement='bottom'>
                 <span class='color-4 m-0 clock-time' style='font-size: 22px; font-weight: bold; line-height: 22px;'>${time}</span>
