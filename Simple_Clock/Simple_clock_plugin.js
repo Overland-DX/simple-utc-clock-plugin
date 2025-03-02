@@ -1,13 +1,23 @@
-// 🔧 Admin Configuration
-let DISPLAY_MODE = "auto";  // "auto" = Users can switch, "local" = Only local time, "utc" = Only UTC
-let LOCAL_TIMEZONE = "Europe/Oslo";  // 🌍 Set the desired timezone
-let USE_DST = true;  // ⏳ Should daylight saving time be used?
-// TimeServer setting: 
-// If your server address starts with "http://" you need to use "http://time.fmdx.no/time.php"
-// If it starts with "https://" you must use "https://time.fmdx.no/php"
-let TIME_SERVER = "https://time.fmdx.no/time.php";  // 🌐 Server to fetch time from (ISO 8601 format)
-let TIME_SERVER_RESPONSE = "utc_time";
+// Simple Clock Plugin v1.2
+// For FM-DX-Webserver v1.3.5 or later.
 
+
+// Configuration
+let DISPLAY_MODE = "auto";  // "auto" = Users can switch, "local" = Only local time, "utc" = Only UTC
+
+// Time settings: 
+let LOCAL_TIMEZONE = "Europe/Oslo";  // Set the desired timezone. For examples: "Europe/London" or you can use "Etc/GMT-1" for zone UTC+01:00.
+let USE_DST = true;  // Important if you use GMT as a zone that uses daylight saving time.
+
+// If your server address starts with "http://" you need to use "http://time.fmdx.no/time.php"
+// If it starts with "https://" you must use "https://time.fmdx.no/time.php"
+let TIME_SERVER = "https://time.fmdx.no/time.php";  // URL to timeserver. You can use any server as long as it follows ISO 8601 format.
+let TIME_SERVER_RESPONSE = "utc_time"; // Change the time server response string. 
+// For example, if the time server's api looks like this "utc_time": "2025-03-02T15:02:20Z", then you should use "utc_time"
+
+
+
+// Below is a main code. Please do not change anything unless you know what you are doing.
 let serverTime = new Date();
 let lastSync = Date.now();
 let TIME_SERVER_FAILED = false;
