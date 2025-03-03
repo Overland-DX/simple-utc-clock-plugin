@@ -1,8 +1,13 @@
-![bilde](https://github.com/user-attachments/assets/cc8a4022-9d6c-49ae-95f3-0db7d7813b54)
-<br><br>
-A simple utc-clock and date which is located at the top right of the top bar on the server.
+Simple Clock Plugin for FM-DX-Webserver.
+<br>![Skjermbilde 2025-03-03 091541](https://github.com/user-attachments/assets/176910cb-8ff8-4742-a41b-62b4717277f9)![Skjermbilde 2025-03-03 091327](https://github.com/user-attachments/assets/c2c62b4f-73a7-49c8-abd5-e14a8fbbe201)![Skjermbilde 2025-03-03 091227](https://github.com/user-attachments/assets/2cea58af-ad73-4f48-936f-adbc7d6b2b6e)<br>![Skjermbilde 2025-03-03 090913](https://github.com/user-attachments/assets/ccd95b1e-f623-4bc7-9f79-fbd35c694769)
+![Skjermbilde 2025-03-03 090947](https://github.com/user-attachments/assets/8c29164e-0ff7-4487-b82f-e82e3f2e7e6b)
 
-Only for Version 1.3.5 or later.
+
+
+
+A simple clock and date which is located at the top right of the top bar on the server.
+
+Only for FM-DX-Webserver V1.3.5 or later.
 
 It is located at the top right of the top bar on the server.
 
@@ -15,6 +20,10 @@ Installation instructions:
 <br>
 If you are unsure which time zone to use, you can find it here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 <br><br>
+Vesion 1.3:<br>
+- Added more time formats, more friendly to other time standards.
+<br>
+<br>
 Version 1.2.0<br>
 - Added fetchServerTime.<br>
 *If an asterisk character appears after the date, it means that the time could not be updated from the time server and the time is retrieved from the client's device. If no characters appear, the time is retrieved correctly from the server.<br><br>
