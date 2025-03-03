@@ -151,7 +151,7 @@ function updateClock() {
 		clockWidget.find('.clock-time').text(time).css({ "margin": "0", "padding": "0", "line-height": "1" });
 		clockWidget.find('.clock-date').text(dateString + ` (${USE_UTC ? "UTC" : "Loc"})` + (TIME_SERVER_FAILED ? " *" : "")).css({ "margin": "0", "padding": "0", "line-height": "1" });
         clockWidget.attr('data-tooltip', DISPLAY_MODE === "auto" 
-		? `Click to toggle UTC & local server time.<br>Local TimeZone: ${serverTimeZone_show}<br><br>Simple Clock v1.3 (beta)` 
+		? `Click to toggle UTC & local server time.<br>Local TimeZone: ${serverTimeZone_show}<br><br>Simple Clock v1.3` 
 		: `${USE_UTC ? 'UTC Time' : 'Local Time'} (Locked)`);
     }
 
