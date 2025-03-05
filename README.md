@@ -52,8 +52,12 @@ Screenshots
 Notes
 
 This plugin is open-source and free to use. Feel free to contribute or modify it as needed. If you encounter issues, please open a ticket in the GitHub repository.
-
-📌 Version: 1.04.0 (Current)
+<br><br>
+📌 Version: 1.04.1: (Current)<br>
+- Added info on tooltip. (Shows whether the time is retrieved from the server API or the user's device.)
+- Fixed the issue with cache storing invalid info.
+<br><br><br>
+Version: 1.04.0:
 - Added clock zoom (5 step).<br>
 - Added hide on phone in the plugin setting.<br>
 - Fixex the dropdown style. It now follow fm-dx-webservers style.<br>
