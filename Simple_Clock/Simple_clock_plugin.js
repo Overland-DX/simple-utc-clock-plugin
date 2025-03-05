@@ -1,4 +1,4 @@
-// Simple Clock Plugin v1.04.1
+// Simple Clock Plugin v1.04.2
 // For FM-DX-Webserver v1.3.5 or later.
 // This is open source code. Feel free to do whatever you want with it.
 
@@ -21,19 +21,21 @@ let TIME_SERVER_RESPONSE = "utc_time";  // Change the time server response strin
 
 
 
-// Below is a main code. Please do not change anything unless you know what you are doing.
-const CURRENT_VERSION = "1.04.1";
-const SAVED_VERSION = localStorage.getItem("PLUGIN_VERSION");
+// Below is the main code. Please do not change anything unless you know what you are doing.
+const CURRENT_VERSION = "1.04.2"; // Sett denne til din nyeste versjon
 
-if (SAVED_VERSION !== CURRENT_VERSION) {
-    console.log("New version detected. Cleaning up outdated settings...");
-    const OBSOLETE_KEYS = ["OLD_SETTING_1", "OLD_SETTING_2"]; 
+if (!localStorage.getItem("PLUGIN_VERSION") || 
+    localStorage.getItem("PLUGIN_VERSION") !== CURRENT_VERSION) {
+    
+    console.log("Ingen eller gammel versjon oppdaget – rydder opp lokal lagring...");
+    
+    // Fjern kun gamle nøkler (hvis du ikke vil slette alt)
+    const OBSOLETE_KEYS = ["CLOCK_FORMAT", "FONT_SIZE_SCALE", "USE_UTC", "HIDE_CLOCK"];
     OBSOLETE_KEYS.forEach(key => localStorage.removeItem(key));
+
+    // Sett den nye versjonen så dette kun skjer én gang
     localStorage.setItem("PLUGIN_VERSION", CURRENT_VERSION);
 }
-
-// Sette standardverdier for klokkestørrelse, men la brukeren overstyre
-if (!localStorage.getItem("FONT_SIZE_SCALE")) localStorage.setItem("FONT_SIZE_SCALE", DEFAULT_FONT_SIZE_SCALE);
 
 // Hente brukervalgte verdier
 let FONT_SIZE_SCALE = parseInt(localStorage.getItem("FONT_SIZE_SCALE"));
@@ -46,10 +48,9 @@ if (isNaN(FONT_SIZE_SCALE) || FONT_SIZE_SCALE < 1 || FONT_SIZE_SCALE > 5) {
 
 // Widget-bredde følger klokkestørrelse
 let WIDGET_WIDTH_SCALE = FONT_SIZE_SCALE;
-
 if (isNaN(WIDGET_WIDTH_SCALE) || WIDGET_WIDTH_SCALE < 1 || WIDGET_WIDTH_SCALE > 5) {
-    WIDGET_WIDTH_SCALE = DEFAULT_WIDGET_WIDTH_SCALE;
-    localStorage.setItem("WIDGET_WIDTH_SCALE", DEFAULT_WIDGET_WIDTH_SCALE);
+    WIDGET_WIDTH_SCALE = FONT_SIZE_SCALE;
+    localStorage.setItem("WIDGET_WIDTH_SCALE", WIDGET_WIDTH_SCALE);
 }
 
 // Håndtering av tid
@@ -71,7 +72,7 @@ const TIME_FORMATS = {
 async function fetchServerTime() {
     try {
         let data = await $.getJSON(TIME_SERVER, { _: new Date().getTime() });
-        if (data[TIME_SERVER_RESPONSE]) {
+        if (data && data[TIME_SERVER_RESPONSE] && !isNaN(new Date(data[TIME_SERVER_RESPONSE]).getTime())) {
             serverTime = new Date(data[TIME_SERVER_RESPONSE]);
             lastSync = Date.now();
             TIME_SERVER_FAILED = false;
@@ -165,7 +166,7 @@ function toggleClockVisibility() {
 
     $("#custom-clock-widget").toggle(!isHidden);
     $("#clock-format-container").toggle(!isHidden);
-    $(".form-group.checkbox:has(#hide-clock)").toggle(!shouldHideClock);
+     $(".form-group.checkbox:has(#hide-clock)").show();
 }
 
 function updateFontSize() {
