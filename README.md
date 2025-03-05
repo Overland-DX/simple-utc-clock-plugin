@@ -1,12 +1,14 @@
 # Simple Clock Plugin for FM-DX-Webserver.
 <br>
 <br>
-![Skjermbilde 2025-03-05 094513](https://github.com/user-attachments/assets/226c277a-7f24-418e-b773-0bf8c3b5059f)
-![Skjermbilde 2025-03-05 094440](https://github.com/user-attachments/assets/0b2f10b8-0852-4c21-91e6-9f499f1a1e75)
+
+![Skjermbilde 2025-03-05 094513](https://github.com/user-attachments/assets/226c277a-7f24-418e-b773-0bf8c3b5059f)![Skjermbilde 2025-03-05 094440](https://github.com/user-attachments/assets/0b2f10b8-0852-4c21-91e6-9f499f1a1e75)
+
+![Skjermbilde 2025-03-05 094832](https://github.com/user-attachments/assets/827d645e-b781-4d67-8f76-b33906d9e9c3)
 
 
 
-
+![Skjermbilde 2025-03-05 094928](https://github.com/user-attachments/assets/53f00580-5923-4f25-ae9c-0ae42232b9fc)
 
 
 
