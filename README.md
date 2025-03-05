@@ -1,36 +1,61 @@
-# Simple Clock Plugin for FM-DX-Webserver.
-<br>
-<br>
+# Simple Clock Plugin for FM-DX-Webserver
 
-![Skjermbilde 2025-03-05 094513](https://github.com/user-attachments/assets/226c277a-7f24-418e-b773-0bf8c3b5059f)![Skjermbilde 2025-03-05 094440](https://github.com/user-attachments/assets/0b2f10b8-0852-4c21-91e6-9f499f1a1e75)
+Overview
 
-![Skjermbilde 2025-03-05 094832](https://github.com/user-attachments/assets/827d645e-b781-4d67-8f76-b33906d9e9c3)
+The Simple Clock Plugin is an add-on for the FM-DX-Webserver V1.3.5 and later, that displays a customizable clock in the top bar. It allows users to toggle between local time and UTC, adjust the clock size, and change clock date format.
 
+Features
 
+🕒 Displays Local or UTC Time - Users can toggle between local and UTC time formats.
 
-![Skjermbilde 2025-03-05 094928](https://github.com/user-attachments/assets/53f00580-5923-4f25-ae9c-0ae42232b9fc)
+🎨 Customizable Clock Size - Adjust the clock size using the mouse wheel.
 
+📱 Mobile-Friendly - Option to hide the clock on mobile devices. Default value is set to not show on mobile. (Can be changed in plugin settings)
 
+🕹️ Toggle Visibility - Easily hide or show the clock from the side panel settings.
 
+🖥️ Configurable Display Position - Choose whether to place the clock before or after other plugins. (Plugin setting)
 
-A simple clock and date which is located at the top right of the top bar on the server.
+🔄 Automatic Time Synchronization - Syncs time with a predefined time server. Remember to check that the url is set up correctly against the server and change to your time zone. (plugin settings)
 
-Only for FM-DX-Webserver V1.3.5 or later.
+🌐 Supports Multiple Time Formats - Select from 12-hour or 24-hour formats with different date styles.
 
-It is located at the top right of the top bar on the server.
+Installation
 
-It retrieves the time and date from the user's device.
+Download or clone the repository.
 
-Installation instructions:
 1. Place the file "Simple_Clock.js" and the folder "Simple_Clock" with its contents in the plugin folder on the server.
 2. Navigate to \plugin\Simple_Clock\ and open Simple_clock_plugin.js with your favorite text editor. Change the values at the top of the code according to your wishes and save the changes.
 3. Restart your server and activate the plugin in Admin Panel.
+
+Ensure your browser allows local storage, as some settings are stored there.
+
+Usage
+
+Click on the clock to switch between UTC and local time.
+
+Open the settings menu to change display preferences.
+
+Use the mouse wheel over the clock to increase or decrease font size.
+
+Screenshots
+
+![Skjermbilde 2025-03-05 094513](https://github.com/user-attachments/assets/226c277a-7f24-418e-b773-0bf8c3b5059f)
 <br>
-If you are unsure which time zone to use, you can find it here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-<br><br>
-Version 1.04.0<br>
-- Added clock zoom (5 step.<br>
-- Added hide om phone in the plugin setting.<br>
+![Skjermbilde 2025-03-05 094440](https://github.com/user-attachments/assets/0b2f10b8-0852-4c21-91e6-9f499f1a1e75)
+<br>
+![Skjermbilde 2025-03-05 094832](https://github.com/user-attachments/assets/827d645e-b781-4d67-8f76-b33906d9e9c3)
+<br>
+![Skjermbilde 2025-03-05 094928](https://github.com/user-attachments/assets/53f00580-5923-4f25-ae9c-0ae42232b9fc)
+
+
+Notes
+
+This plugin is open-source and free to use. Feel free to contribute or modify it as needed. If you encounter issues, please open a ticket in the GitHub repository.
+
+📌 Version: 1.04.0 (Current)
+- Added clock zoom (5 step).<br>
+- Added hide on phone in the plugin setting.<br>
 - Fixex the dropdown style. It now follow fm-dx-webservers style.<br>
 - Fixed USA date format and 12h time.<br>
 - Changed the position to center in mobile view.<br>
@@ -78,6 +103,5 @@ Version 1.00.4:
 - Added user choice in UTC or local time at the top of Simple_clock_plugin.js.
 - Some words were in Norwegian and have been changed to English.
 - Rewrite code for jquery for better performance.
-
-
+>
 
