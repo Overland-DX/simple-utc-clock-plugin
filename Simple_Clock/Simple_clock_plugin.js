@@ -131,7 +131,7 @@ function toggleClockVisibility() {
 
     $("#custom-clock-widget").toggle(!isHidden);
     $("#clock-format-container").toggle(!isHidden);
-    $(".form-group.checkbox:has(#hide-clock)").toggle(!shouldHideClock);
+    $(".form-group.checkbox:has(#hide-clock)").show();
 }
 
 function updateFontSize() {
