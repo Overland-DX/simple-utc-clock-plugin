@@ -91,7 +91,7 @@ async function fetchServerTime() {
 // Plugin-informasjon og statusvariabler
 const PLUGIN_INFO = {
     version: CURRENT_VERSION,
-    syncStatus: TIME_SERVER_FAILED ? "Synchronizes time from user device." : "Synchronizes time from time-server."
+    syncStatus: TIME_SERVER_FAILED ? "Synchronizes time from user device." : "Synchronizes time from server API."
 };
 
 function AdditionalCheckboxesHideClock() {
