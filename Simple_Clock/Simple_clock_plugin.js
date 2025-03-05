@@ -1,14 +1,13 @@
-// Simple Clock Plugin v1.04.0
+// Simple Clock Plugin v1.04.1
 // For FM-DX-Webserver v1.3.5 or later.
 // This is open source code. Feel free to do whatever you want with it.
 
 
-
 // Configuration
 let DISPLAY_MODE = "auto";  // "auto" = Users can switch, "local" = Only local time, "utc" = Only UTC
-let FONT_SIZE_SCALE = parseInt(localStorage.getItem("FONT_SIZE_SCALE")) || 3;  // Set the default value for the clock size. Between 1 and 5 are allowed.
-let PLUGIN_POSITION = localStorage.getItem("PLUGIN_POSITION") || "after"; // "after" or "before" other plugins in the rigth area on topbar.
-const HIDE_CLOCK_ON_MOBILE = true; // Set to false; if you want the clock to be displayed on the mobile.
+const DEFAULT_FONT_SIZE_SCALE = 3;  // Set the default value for the clock size. Between 1 and 5 are allowed.
+let PLUGIN_POSITION = "after"; // "after" or "before" other plugins in the rigth area on topbar.
+const HIDE_CLOCK_ON_MOBILE = false; // Set to false; if you want the clock to be displayed on the mobile.
 
 // Time settings: 
 let LOCAL_TIMEZONE = "Europe/Oslo";  // Set the desired timezone. For example: "Europe/London" or "Etc/GMT-1" for zone UTC+01:00.
@@ -16,28 +15,57 @@ let USE_DST = true;  // Important if you use GMT as a zone that uses daylight sa
 let TIME_SERVER = "https://time.fmdx.no/time.php";  // URL to timeserver. You can use any server API as long as it follows ISO 8601 format.
 // If your server address starts with "http://" you need to use "http://time.fmdx.no/time.php"
 // If it starts with "https://" you must use "https://time.fmdx.no/time.php"
-let TIME_SERVER_RESPONSE = "utc_time"; // Change the time server response string. 
+let TIME_SERVER_RESPONSE = "utc_time";  // Change the time server response string.
 // For example, if the time server's api looks like this "utc_time": "2025-03-02T15:02:20Z", then you should use "utc_time"
 
 
 
 
-
 // Below is a main code. Please do not change anything unless you know what you are doing.
+const CURRENT_VERSION = "1.04.1";
+const SAVED_VERSION = localStorage.getItem("PLUGIN_VERSION");
+
+if (SAVED_VERSION !== CURRENT_VERSION) {
+    console.log("New version detected. Cleaning up outdated settings...");
+    const OBSOLETE_KEYS = ["OLD_SETTING_1", "OLD_SETTING_2"]; 
+    OBSOLETE_KEYS.forEach(key => localStorage.removeItem(key));
+    localStorage.setItem("PLUGIN_VERSION", CURRENT_VERSION);
+}
+
+// Sette standardverdier for klokkestørrelse, men la brukeren overstyre
+if (!localStorage.getItem("FONT_SIZE_SCALE")) localStorage.setItem("FONT_SIZE_SCALE", DEFAULT_FONT_SIZE_SCALE);
+
+// Hente brukervalgte verdier
+let FONT_SIZE_SCALE = parseInt(localStorage.getItem("FONT_SIZE_SCALE"));
+
+// Sikre at verdien er gyldig
+if (isNaN(FONT_SIZE_SCALE) || FONT_SIZE_SCALE < 1 || FONT_SIZE_SCALE > 5) {
+    FONT_SIZE_SCALE = DEFAULT_FONT_SIZE_SCALE;
+    localStorage.setItem("FONT_SIZE_SCALE", DEFAULT_FONT_SIZE_SCALE);
+}
+
+// Widget-bredde følger klokkestørrelse
+let WIDGET_WIDTH_SCALE = FONT_SIZE_SCALE;
+
+if (isNaN(WIDGET_WIDTH_SCALE) || WIDGET_WIDTH_SCALE < 1 || WIDGET_WIDTH_SCALE > 5) {
+    WIDGET_WIDTH_SCALE = DEFAULT_WIDGET_WIDTH_SCALE;
+    localStorage.setItem("WIDGET_WIDTH_SCALE", DEFAULT_WIDGET_WIDTH_SCALE);
+}
+
+// Håndtering av tid
+let USE_UTC = DISPLAY_MODE === "utc" ? true : DISPLAY_MODE === "local" ? false : (localStorage.getItem("USE_UTC") === "true");
 let serverTimeZone_show = LOCAL_TIMEZONE;
 let serverTime = new Date();
 let lastSync = Date.now();
 let TIME_SERVER_FAILED = false;
-let USE_UTC = DISPLAY_MODE === "utc" ? true : DISPLAY_MODE === "local" ? false : (localStorage.getItem("USE_UTC") !== "false");
-let WIDGET_WIDTH_SCALE = parseInt(localStorage.getItem("WIDGET_WIDTH_SCALE")) || 3;
 
 const TIME_FORMATS = {
-    "24h D.M.Y": { time: "HH:mm:ss", date: "dd.MM.yyyy" },  // Europe/world 24h
-    "12h D.M.Y": { time: "hh:mm a", date: "dd.MM.yyyy" },  // Europe/world 12h
-    "12h M.D.Y": { time: "hh:mm a", date: "MM/dd/yyyy" }, // USA 12h
-    "24h M.D.Y": { time: "HH:mm:ss", date: "MM.dd.yyyy" }, // USA 24h
-    "24h Time only": { time: "HH:mm:ss"}, // Only time 24h
-    "12h Time only": { time: "h:mm a"} // Only time 12h
+    "24h D.M.Y": { time: "HH:mm:ss", date: "dd.MM.yyyy" },  
+    "12h D.M.Y": { time: "hh:mm a", date: "dd.MM.yyyy" },  
+    "24h M.D.Y": { time: "HH:mm:ss", date: "MM.dd.yyyy" }, 
+    "12h M.D.Y": { time: "hh:mm a", date: "MM/dd/yyyy" }, 
+    "24h Time only": { time: "HH:mm:ss"}, 
+    "12h Time only": { time: "h:mm a"} 
 };
 
 async function fetchServerTime() {
@@ -59,6 +87,12 @@ async function fetchServerTime() {
         updateClock();
     }
 }
+
+// Plugin-informasjon og statusvariabler
+const PLUGIN_INFO = {
+    version: CURRENT_VERSION,
+    syncStatus: TIME_SERVER_FAILED ? "Synchronizes time from user device." : "Synchronizes time from time-server."
+};
 
 function AdditionalCheckboxesHideClock() {
     const checkboxes = $('.modal-panel-content .form-group.checkbox');
@@ -131,7 +165,7 @@ function toggleClockVisibility() {
 
     $("#custom-clock-widget").toggle(!isHidden);
     $("#clock-format-container").toggle(!isHidden);
-    $(".form-group.checkbox:has(#hide-clock)").show();
+    $(".form-group.checkbox:has(#hide-clock)").toggle(!shouldHideClock);
 }
 
 function updateFontSize() {
@@ -203,7 +237,7 @@ function updateClock() {
 		let widgetHtml = `
 			<div id='custom-clock-widget' class='flex-container flex-center tooltip hide-phone hover-brighten br-15' 
 				style='position: relative; height: 54px; width: 125px; padding: 2px; text-align: center; display: flex; flex-direction: column; gap: 2px; user-select: none;'
-				data-tooltip='Click to toggle UTC & local server time.<br>Local TimeZone: ${serverTimeZone_show}<br><br>Simple Clock v1.04.0' data-tooltip-placement='bottom'>
+				data-tooltip='Click to toggle UTC & local server time.<br>Local TimeZone: ${serverTimeZone_show}<br>${PLUGIN_INFO.syncStatus}<br><br>Simple Clock v${PLUGIN_INFO.version}' data-tooltip-placement='bottom'>
 
 				<span class='color-4 m-0 clock-mode' 
 					style='position: absolute; top: -5px; left: 78%; transform: translateX(-50%); font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 5px;'>
@@ -234,7 +268,7 @@ function updateClock() {
         clockWidget.find('.clock-time').text(time);
         clockWidget.find('.clock-mode').text(timeMode + timeSyncMarker);
 
-		let tooltipText = `Click to toggle UTC & local server time.<br>Local TimeZone: ${serverTimeZone_show}<br><br>Simple Clock v1.04.0`;
+		let tooltipText = `Click to toggle UTC & local server time.<br>Local TimeZone: ${serverTimeZone_show}<br>${PLUGIN_INFO.syncStatus}<br><br>Simple Clock v${PLUGIN_INFO.version}`;
 
 		if (DISPLAY_MODE !== "auto") {
 			tooltipText = USE_UTC 
