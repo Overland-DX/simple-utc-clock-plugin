@@ -53,7 +53,12 @@ Notes
 
 This plugin is open-source and free to use. Feel free to contribute or modify it as needed. If you encounter issues, please open a ticket in the GitHub repository.
 <br><br>
-📌 Version: 1.04.1: (Current)<br>
+📌 Version: 1.04.2: Hotfix2 (Current)<br>
+- Fixed: when hiding the clock with a mobile, the button disappeared.
+- Optimized checking for older versions and corrupt cache.
+
+<br><br>
+Version: 1.04.1:<br>
 - Added info on tooltip. (Shows whether the time is retrieved from the server API or the user's device.)
 - Fixed the issue with cache storing invalid info.
 <br><br><br>
