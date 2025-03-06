@@ -52,8 +52,15 @@ Screenshots
 Notes
 
 This plugin is open-source and free to use. Feel free to contribute or modify it as needed. If you encounter issues, please open a ticket in the GitHub repository.
+<br><br><br><br>
+📌 Version: 1.04.3: (Current)<br>
+- Now the sync type is displayed correctly in the tooltip.
+- Made changes to how data is cached.
+- Made it easier to set the server API URL.
+- Set default value for HIDE_CLOCK_ON_MOBILE to false.
+
 <br><br>
-📌 Version: 1.04.2: Hotfix2 (Current)<br>
+Version: 1.04.2: Hotfix2<br>
 - Fixed: when hiding the clock with a mobile, the button disappeared.
 - Optimized checking for older versions and corrupt cache.
 
@@ -62,7 +69,8 @@ Version: 1.04.1:<br>
 - Added info on tooltip. (Shows whether the time is retrieved from the server API or the user's device.)
 - Fixed the issue with cache storing invalid info.
 <br><br><br>
-Version: 1.04.0:
+
+Version: 1.04.0:<br>
 - Added clock zoom (5 step).<br>
 - Added hide on phone in the plugin setting.<br>
 - Fixex the dropdown style. It now follow fm-dx-webservers style.<br>
