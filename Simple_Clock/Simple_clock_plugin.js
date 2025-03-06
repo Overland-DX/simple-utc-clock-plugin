@@ -1,4 +1,4 @@
-// Simple Clock Plugin v1.04.2
+// Simple Clock Plugin v1.04.3
 // For FM-DX-Webserver v1.3.5 or later.
 // This is open source code. Feel free to do whatever you want with it.
 
@@ -7,14 +7,12 @@
 let DISPLAY_MODE = "auto";  // "auto" = Users can switch, "local" = Only local time, "utc" = Only UTC
 const DEFAULT_FONT_SIZE_SCALE = 3;  // Set the default value for the clock size. Between 1 and 5 are allowed.
 let PLUGIN_POSITION = "after"; // "after" or "before" other plugins in the rigth area on topbar.
-const HIDE_CLOCK_ON_MOBILE = false; // Set to false; if you want the clock to be displayed on the mobile.
+const HIDE_CLOCK_ON_MOBILE = false; // Set to true; if you want to hide clock from be displayed on the mobile.
 
 // Time settings: 
-let LOCAL_TIMEZONE = "Europe/Oslo";  // Set the desired timezone. For example: "Europe/London" or "Etc/GMT-1" for zone UTC+01:00.
+let LOCAL_TIMEZONE = "Europe/London";  // Set the desired timezone. For example: "Europe/London" or "Etc/GMT-1" for zone UTC+01:00.
 let USE_DST = true;  // Important if you use GMT as a zone that uses daylight saving time.
-let TIME_SERVER = "https://time.fmdx.no/time.php";  // URL to timeserver. You can use any server API as long as it follows ISO 8601 format.
-// If your server address starts with "http://" you need to use "http://time.fmdx.no/time.php"
-// If it starts with "https://" you must use "https://time.fmdx.no/time.php"
+let API_SERVER_ADDRESS = "time.fmdx.no/time.php"; // URL to timeserver, do not include http:// or https://. You can use any server API as long as it follows ISO 8601 format.
 let TIME_SERVER_RESPONSE = "utc_time";  // Change the time server response string.
 // For example, if the time server's api looks like this "utc_time": "2025-03-02T15:02:20Z", then you should use "utc_time"
 
@@ -22,43 +20,39 @@ let TIME_SERVER_RESPONSE = "utc_time";  // Change the time server response strin
 
 
 // Below is the main code. Please do not change anything unless you know what you are doing.
-const CURRENT_VERSION = "1.04.2"; // Sett denne til din nyeste versjon
+const CURRENT_VERSION = "1.04.3";
 
-if (!localStorage.getItem("PLUGIN_VERSION") || 
-    localStorage.getItem("PLUGIN_VERSION") !== CURRENT_VERSION) {
+if (!localStorage.getItem("SIMPLE_CLOCK_PLUGIN_VERSION") || 
+    localStorage.getItem("SIMPLE_CLOCK_PLUGIN_VERSION") !== CURRENT_VERSION) {
     
     console.log("Ingen eller gammel versjon oppdaget – rydder opp lokal lagring...");
-    
-    // Fjern kun gamle nøkler (hvis du ikke vil slette alt)
-    const OBSOLETE_KEYS = ["CLOCK_FORMAT", "FONT_SIZE_SCALE", "USE_UTC", "HIDE_CLOCK"];
+
+    const OBSOLETE_KEYS = ["SIMPLE_CLOCK_CLOCK_FORMAT", "SIMPLE_CLOCK_FONT_SIZE_SCALE", "SIMPLE_CLOCK_USE_UTC", "SIMPLE_CLOCK_HIDE_CLOCK"];
     OBSOLETE_KEYS.forEach(key => localStorage.removeItem(key));
 
-    // Sett den nye versjonen så dette kun skjer én gang
-    localStorage.setItem("PLUGIN_VERSION", CURRENT_VERSION);
+    localStorage.setItem("SIMPLE_CLOCK_PLUGIN_VERSION", CURRENT_VERSION);
 }
 
-// Hente brukervalgte verdier
-let FONT_SIZE_SCALE = parseInt(localStorage.getItem("FONT_SIZE_SCALE"));
+let SIMPLE_CLOCK_FONT_SIZE_SCALE = parseInt(localStorage.getItem("SIMPLE_CLOCK_FONT_SIZE_SCALE"));
 
-// Sikre at verdien er gyldig
-if (isNaN(FONT_SIZE_SCALE) || FONT_SIZE_SCALE < 1 || FONT_SIZE_SCALE > 5) {
-    FONT_SIZE_SCALE = DEFAULT_FONT_SIZE_SCALE;
-    localStorage.setItem("FONT_SIZE_SCALE", DEFAULT_FONT_SIZE_SCALE);
+if (isNaN(SIMPLE_CLOCK_FONT_SIZE_SCALE) || SIMPLE_CLOCK_FONT_SIZE_SCALE < 1 || SIMPLE_CLOCK_FONT_SIZE_SCALE > 5) {
+    SIMPLE_CLOCK_FONT_SIZE_SCALE = DEFAULT_FONT_SIZE_SCALE;
+    localStorage.setItem("SIMPLE_CLOCK_FONT_SIZE_SCALE", DEFAULT_FONT_SIZE_SCALE);
 }
 
-// Widget-bredde følger klokkestørrelse
-let WIDGET_WIDTH_SCALE = FONT_SIZE_SCALE;
+let WIDGET_WIDTH_SCALE = SIMPLE_CLOCK_FONT_SIZE_SCALE;
 if (isNaN(WIDGET_WIDTH_SCALE) || WIDGET_WIDTH_SCALE < 1 || WIDGET_WIDTH_SCALE > 5) {
-    WIDGET_WIDTH_SCALE = FONT_SIZE_SCALE;
+    WIDGET_WIDTH_SCALE = SIMPLE_CLOCK_FONT_SIZE_SCALE;
     localStorage.setItem("WIDGET_WIDTH_SCALE", WIDGET_WIDTH_SCALE);
 }
 
-// Håndtering av tid
-let USE_UTC = DISPLAY_MODE === "utc" ? true : DISPLAY_MODE === "local" ? false : (localStorage.getItem("USE_UTC") === "true");
+let SIMPLE_CLOCK_USE_UTC = DISPLAY_MODE === "utc" ? true : DISPLAY_MODE === "local" ? false : (localStorage.getItem("SIMPLE_CLOCK_USE_UTC") === "true");
 let serverTimeZone_show = LOCAL_TIMEZONE;
 let serverTime = new Date();
 let lastSync = Date.now();
 let TIME_SERVER_FAILED = false;
+let protocol = window.location.protocol === 'https:' ? 'https' : 'http';
+let TIME_SERVER = `${protocol}://${API_SERVER_ADDRESS}`;
 
 const TIME_FORMATS = {
     "24h D.M.Y": { time: "HH:mm:ss", date: "dd.MM.yyyy" },  
@@ -89,10 +83,8 @@ async function fetchServerTime() {
     }
 }
 
-// Plugin-informasjon og statusvariabler
 const PLUGIN_INFO = {
     version: CURRENT_VERSION,
-    syncStatus: TIME_SERVER_FAILED ? "Synchronizes time from user device." : "Synchronizes time from server API."
 };
 
 function AdditionalCheckboxesHideClock() {
@@ -108,9 +100,9 @@ function AdditionalCheckboxesHideClock() {
         `);
     }
 
-    let isClockHidden = localStorage.getItem("HIDE_CLOCK") === "true";
+    let isClockHidden = localStorage.getItem("SIMPLE_CLOCK_HIDE_CLOCK") === "true";
     $("#hide-clock").prop("checked", isClockHidden).change(function() {
-        localStorage.setItem("HIDE_CLOCK", $(this).is(":checked"));
+        localStorage.setItem("SIMPLE_CLOCK_HIDE_CLOCK", $(this).is(":checked"));
         toggleClockVisibility();
     });
 }
@@ -142,12 +134,12 @@ function AdditionalDropdownClockFormat() {
     $("#clock-format-options .option").click(function() {
         let selectedFormat = $(this).data("value");
         if ($(this).attr("id") === "hide-clock-option") {
-            let isHidden = localStorage.getItem("HIDE_CLOCK") === "true";
-            localStorage.setItem("HIDE_CLOCK", isHidden ? "false" : "true");
+            let isHidden = localStorage.getItem("SIMPLE_CLOCK_HIDE_CLOCK") === "true";
+            localStorage.setItem("SIMPLE_CLOCK_HIDE_CLOCK", isHidden ? "false" : "true");
             toggleClockVisibility();
             $(this).text(isHidden ? "Hide Clock" : "Show Clock");
         } else {
-            localStorage.setItem("CLOCK_FORMAT", selectedFormat);
+            localStorage.setItem("SIMPLE_CLOCK_CLOCK_FORMAT", selectedFormat);
             $("#clock-format-input").val($(this).text());
             updateClock();
         }
@@ -155,12 +147,12 @@ function AdditionalDropdownClockFormat() {
         $("#clock-format-options").removeClass("opened");
     });
 
-    let savedFormat = localStorage.getItem("CLOCK_FORMAT") || Object.keys(TIME_FORMATS)[0];
+    let savedFormat = localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT") || Object.keys(TIME_FORMATS)[0];
     $("#clock-format-input").val(savedFormat);
 }
 
 function toggleClockVisibility() {
-    let isHidden = localStorage.getItem("HIDE_CLOCK") === "true";
+    let isHidden = localStorage.getItem("SIMPLE_CLOCK_HIDE_CLOCK") === "true";
     let isMobile = $(window).width() <= 768;
     let shouldHideClock = isHidden || (HIDE_CLOCK_ON_MOBILE && isMobile);
 
@@ -170,12 +162,12 @@ function toggleClockVisibility() {
 }
 
 function updateFontSize() {
-    let fontSizeFactor = FONT_SIZE_SCALE * 2 + 16;
-    let fontSizeFactorDate = FONT_SIZE_SCALE + 10; 
-    let widgetWidth = FONT_SIZE_SCALE * 10 + 70;
+    let fontSizeFactor = SIMPLE_CLOCK_FONT_SIZE_SCALE * 2 + 16;
+    let fontSizeFactorDate = SIMPLE_CLOCK_FONT_SIZE_SCALE + 10; 
+    let widgetWidth = SIMPLE_CLOCK_FONT_SIZE_SCALE * 10 + 70;
     let timeFontSize = Math.min(Math.max(fontSizeFactor, 18), 30);
     let dateFontSize = Math.min(Math.max(fontSizeFactorDate, 9), 14);
-    let topOffset = Math.min(Math.max((FONT_SIZE_SCALE * -1) - 1, -5), 2);
+    let topOffset = Math.min(Math.max((SIMPLE_CLOCK_FONT_SIZE_SCALE * -1) - 1, -5), 2);
 
     $('#custom-clock-widget .clock-time').css("font-size", timeFontSize + "px");
     $('#custom-clock-widget .clock-date').css("font-size", dateFontSize + "px");
@@ -185,7 +177,7 @@ function updateFontSize() {
 
 function updateClock() {
     let now = new Date(serverTime.getTime() + (Date.now() - lastSync));
-    let selectedFormat = localStorage.getItem("CLOCK_FORMAT") || Object.keys(TIME_FORMATS)[0];
+    let selectedFormat = localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT") || Object.keys(TIME_FORMATS)[0];
     let format = TIME_FORMATS[selectedFormat];
     let clockWidget = $('#custom-clock-widget');
 
@@ -196,7 +188,7 @@ function updateClock() {
         minute: '2-digit', 
         second: '2-digit', 
         hour12: true,  
-        timeZone: USE_UTC ? "UTC" : LOCAL_TIMEZONE
+        timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
     }).format(now);
 
     let [time, amPmText] = fullTime.split(' ');
@@ -207,7 +199,7 @@ function updateClock() {
             minute: '2-digit', 
             second: '2-digit',  
             hour12: false,  
-            timeZone: USE_UTC ? "UTC" : LOCAL_TIMEZONE
+            timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
         }).format(now);
         amPmText = ""; 
     }
@@ -227,12 +219,12 @@ function updateClock() {
             month: format.date.includes('MMMM') ? 'long' : '2-digit',  
             year: 'numeric',
             weekday: format.date.includes('eeee') ? 'long' : undefined,  
-            timeZone: USE_UTC ? "UTC" : LOCAL_TIMEZONE
+            timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
         }).format(now);
     }
 
-    let timeMode = USE_UTC ? "UTC" : "Local";
-
+    let timeMode = SIMPLE_CLOCK_USE_UTC ? "UTC" : "Local";
+    PLUGIN_INFO.syncStatus = TIME_SERVER_FAILED ? "Synchronizes time from user device." : "Synchronizes time from server API.";
 	if (!clockWidget.length) {
 		let panelContainer = $(".dashboard-panel .panel-100-real .dashboard-panel-plugin-content");
 		let widgetHtml = `
@@ -267,18 +259,18 @@ function updateClock() {
         
         let timeSyncMarker = TIME_SERVER_FAILED ? '*' : '';
         clockWidget.find('.clock-time').text(time);
-        clockWidget.find('.clock-mode').text(timeMode + timeSyncMarker);
+        clockWidget.find('.clock-mode').text(timeSyncMarker + timeMode);
 
 		let tooltipText = `Click to toggle UTC & local server time.<br>Local TimeZone: ${serverTimeZone_show}<br>${PLUGIN_INFO.syncStatus}<br><br>Simple Clock v${PLUGIN_INFO.version}`;
 
 		if (DISPLAY_MODE !== "auto") {
-			tooltipText = USE_UTC 
+			tooltipText = SIMPLE_CLOCK_USE_UTC 
 			? "You are viewing UTC Time. Click to switch to Local Time."
 			: "You are viewing Local Time. Click to switch to UTC Time.";
 		}
 		clockWidget.attr('data-tooltip', tooltipText);
     }
-	$('#custom-clock-widget').css("width", (FONT_SIZE_SCALE * 10 + 10) + "px");
+	$('#custom-clock-widget').css("width", (SIMPLE_CLOCK_FONT_SIZE_SCALE * 10 + 10) + "px");
     if (HIDE_CLOCK_ON_MOBILE && $(window).width() <= 768) {
 		clockWidget.hide();
 	} else {
@@ -315,14 +307,14 @@ function updateClock() {
 
 function toggleTimeFormat() {
     if (DISPLAY_MODE !== "auto") return;
-    USE_UTC = !USE_UTC;
-    localStorage.setItem("USE_UTC", USE_UTC.toString());
-    console.log(`Toggled time format: Now using ${USE_UTC ? "UTC" : "Local"} time`);
+    SIMPLE_CLOCK_USE_UTC = !SIMPLE_CLOCK_USE_UTC;
+    localStorage.setItem("SIMPLE_CLOCK_USE_UTC", SIMPLE_CLOCK_USE_UTC.toString());
+    console.log(`Toggled time format: Now using ${SIMPLE_CLOCK_USE_UTC ? "UTC" : "Local"} time`);
     updateClock();
 }
 
 $(document).ready(() => {
-    console.log(`DOM loaded, starting clock (${USE_UTC ? 'UTC' : 'Local time'})...`);
+    console.log(`DOM loaded, starting clock (${SIMPLE_CLOCK_USE_UTC ? 'UTC' : 'Local time'})...`);
     serverTime = new Date();
     lastSync = Date.now();
     fetchServerTime();
@@ -338,11 +330,11 @@ $(document).ready(() => {
 		event.preventDefault();
 
 		if (event.originalEvent.deltaY > 0) {
-			FONT_SIZE_SCALE = Math.max(FONT_SIZE_SCALE - 1, 1);
+			SIMPLE_CLOCK_FONT_SIZE_SCALE = Math.max(SIMPLE_CLOCK_FONT_SIZE_SCALE - 1, 1);
 		} else {
-			FONT_SIZE_SCALE = Math.min(FONT_SIZE_SCALE + 1, 5);
+			SIMPLE_CLOCK_FONT_SIZE_SCALE = Math.min(SIMPLE_CLOCK_FONT_SIZE_SCALE + 1, 5);
 		}
-		localStorage.setItem("FONT_SIZE_SCALE", FONT_SIZE_SCALE);
+		localStorage.setItem("SIMPLE_CLOCK_FONT_SIZE_SCALE", SIMPLE_CLOCK_FONT_SIZE_SCALE);
 		updateFontSize();
 	});
 });
