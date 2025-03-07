@@ -1,3 +1,4 @@
+(() => {
 // Simple Clock Plugin v1.04.3
 // For FM-DX-Webserver v1.3.5 or later.
 // This is open source code. Feel free to do whatever you want with it.
@@ -25,7 +26,7 @@ const CURRENT_VERSION = "1.04.3";
 if (!localStorage.getItem("SIMPLE_CLOCK_PLUGIN_VERSION") || 
     localStorage.getItem("SIMPLE_CLOCK_PLUGIN_VERSION") !== CURRENT_VERSION) {
     
-    console.log("Ingen eller gammel versjon oppdaget – rydder opp lokal lagring...");
+    console.log("None or old version detected - cleaning up local storage...");
 
     const OBSOLETE_KEYS = ["SIMPLE_CLOCK_CLOCK_FORMAT", "SIMPLE_CLOCK_FONT_SIZE_SCALE", "SIMPLE_CLOCK_USE_UTC", "SIMPLE_CLOCK_HIDE_CLOCK"];
     OBSOLETE_KEYS.forEach(key => localStorage.removeItem(key));
@@ -338,3 +339,4 @@ $(document).ready(() => {
 		updateFontSize();
 	});
 });
+})();
