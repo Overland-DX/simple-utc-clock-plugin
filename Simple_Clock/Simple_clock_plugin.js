@@ -51,8 +51,8 @@ let serverTimeZone_show = LOCAL_TIMEZONE;
 let serverTime = new Date();
 let lastSync = Date.now();
 let TIME_SERVER_FAILED = false;
-let protocol = window.location.protocol === 'https:' ? 'https' : 'http';
-let TIME_SERVER = `${protocol}://${API_SERVER_ADDRESS}`;
+let timeProtocol = window.location.protocol === 'https:' ? 'https' : 'http';
+let TIME_SERVER = `${timeProtocol}://${API_SERVER_ADDRESS}`;
 
 const TIME_FORMATS = {
     "24h D.M.Y": { time: "HH:mm:ss", date: "dd.MM.yyyy" },  
