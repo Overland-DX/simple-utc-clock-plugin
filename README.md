@@ -29,7 +29,7 @@ Download or clone the repository.
 3. Restart your server and activate the plugin in Admin Panel.
 <br><br>Note!<br>
 If you are unsure which time zone to use, you can find some tips/info here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-<br>Ensure your browser allows local storage, as some settings are stored there.
+<br>
 <br><br><br>
 
 Usage:
