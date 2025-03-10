@@ -3,7 +3,7 @@
 Overview
 
 The Simple Clock Plugin is an add-on for the FM-DX-Webserver V1.3.5 and later, that displays a customizable clock in the top bar. It allows users to toggle between local time and UTC, adjust the clock size, and change clock date format.
-
+<br><br><br>
 Features
 
 🕒 Displays Local or UTC Time - Users can toggle between local and UTC time formats.
@@ -19,40 +19,42 @@ Features
 🔄 Automatic Time Synchronization - Syncs time with a predefined time server. Remember to check that the url is set up correctly against the server and change to your time zone. (plugin settings)
 
 🌐 Supports Multiple Time Formats - Select from 12-hour or 24-hour formats with different date styles.
-
-Installation
+<br><br><br>
+Installation:
 
 Download or clone the repository.
 
 1. Place the file "Simple_Clock.js" and the folder "Simple_Clock" with its contents in the plugin folder on the server.
 2. Navigate to \plugin\Simple_Clock\ and open Simple_clock_plugin.js with your favorite text editor. Change the values at the top of the code according to your wishes and save the changes.
 3. Restart your server and activate the plugin in Admin Panel.
+<br><br>Note!<br>
+If you are unsure which time zone to use, you can find it here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+<br>Ensure your browser allows local storage, as some settings are stored there.
+<br><br><br>
 
-Ensure your browser allows local storage, as some settings are stored there.
-
-Usage
+Usage:
 
 Click on the clock to switch between UTC and local time.
 
 Open the settings menu to change display preferences.
 
-Use the mouse wheel over the clock to increase or decrease font size.
+Use the mouse wheel over the clock to increase or decrease clock size.
+<br><br><br>
+Screenshots:
 
-Screenshots
-
-![Skjermbilde 2025-03-05 094513](https://github.com/user-attachments/assets/226c277a-7f24-418e-b773-0bf8c3b5059f)
 <br>
-![Skjermbilde 2025-03-05 094440](https://github.com/user-attachments/assets/0b2f10b8-0852-4c21-91e6-9f499f1a1e75)
-<br>
-![Skjermbilde 2025-03-05 094832](https://github.com/user-attachments/assets/827d645e-b781-4d67-8f76-b33906d9e9c3)
-<br>
-![Skjermbilde 2025-03-05 094928](https://github.com/user-attachments/assets/53f00580-5923-4f25-ae9c-0ae42232b9fc)
 
+![oversikt](https://github.com/user-attachments/assets/6b9de157-5b4d-4fa8-aa7e-05547b35da2f)
+<br>
 
+![image](https://github.com/user-attachments/assets/acadaf29-3eb6-45c7-9e2e-f5bc960f53ed)
+<br>
+
+<br><br><br>
 Notes
 
 This plugin is open-source and free to use. Feel free to contribute or modify it as needed. If you encounter issues, please open a ticket in the GitHub repository.
-<br><br><br><br>
+<br><br><br><br><br><br><br>
 📌 Version: 1.04.3: (Current)<br>
 - Now the sync type is displayed correctly in the tooltip.
 - Made changes to how data is cached.
