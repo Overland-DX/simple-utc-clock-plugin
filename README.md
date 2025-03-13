@@ -55,7 +55,16 @@ Notes
 
 This plugin is open-source and free to use. Feel free to contribute or modify it as needed. If you encounter issues, please open a ticket in the GitHub repository.
 <br><br><br><br><br><br><br>
-📌 Version: 1.04.3: (Current)<br>
+📌 Version: 1.05.0: (Current, and hopefully final version)<br>
+ - Added dynamic text in tooltip. The current time mode as UTC or Local is now displayed in the tooltip. Plus other relevant information.
+ - Added new options in plugin settings, which give the server owner the ability to decide what the user can do. Such as changing the size of the clock, hiding "UTC"/"Local" that is displayed above the clock.
+ - Added more time formats.
+ - Fixed some bugs. As when admin has set the clock to hidden for mobile viewing, the dropdown and button to hide the clock are also removed.
+ - Fixed the gap between time and date in mobile view to be smaller.
+ - +++
+
+<br><br>
+Version: 1.04.3:<br>
 - Now the sync type is displayed correctly in the tooltip.
 - Made changes to how data is cached.
 - Made it easier to set the server API URL.
