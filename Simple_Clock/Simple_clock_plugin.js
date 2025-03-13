@@ -394,11 +394,6 @@ function updateDynText2() {
     cycleExtraMessages();
 }
 
-function updateTooltip() {
-    let tooltipText = DynTekst_show + "\n" + DynTekst_show2;
-    $('#custom-clock-widget').attr('data-tooltip-content', tooltipText);
-}
-
 fetchServerTime().then(() => {
     updateDynText2();
 });
