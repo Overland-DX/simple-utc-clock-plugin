@@ -1,5 +1,5 @@
 (() => {
-// Simple Clock v1.05.0
+// Simple Clock v1.05.1
 // For FM-DX-Webserver v1.3.5 or later.
 // This is open source code. Feel free to do whatever you want with it.
 
@@ -24,7 +24,7 @@ let TIME_SERVER_RESPONSE = "utc_time";  // Change the time server response strin
 
 
 // Below is the main code. Please do not change anything unless you know what you are doing.
-const CURRENT_VERSION = "1.05.0";
+const CURRENT_VERSION = "1.05.1";
 
 if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
     let SIMPLE_CLOCK_FONT_SIZE_SCALE = parseInt(localStorage.getItem("SIMPLE_CLOCK_FONT_SIZE_SCALE"));
@@ -72,9 +72,9 @@ const TIME_FORMATS = {
     "24h dd.MM.yyyy": { time: "HH:mm:ss", date: "dd.MM.yyyy" }, 
     "24h dd MMM yyyy": { time: "HH:mm:ss", date: "dd MMM yyyy" }, 
     "12h dd.MM.yyyy": { time: "hh:mm a", date: "dd.MM.yyyy" },  
-    "24h MM/dd/yyyy": { time: "HH:mm:ss", date: "MM.dd.yyyy" }, 
+    "24h MM.dd.yyyy": { time: "HH:mm:ss", date: "MM.dd.yyyy" }, 
     "24h MMM dd yyyy": { time: "HH:mm:ss", date: "MMM dd yyyy" }, 
-    "12h MM/dd/yyyy": { time: "hh:mm a", date: "MM/dd/yyyy" }, 
+    "12h MM.dd.yyyy": { time: "hh:mm a", date: "MM.dd.yyyy" }, 
     "24h Time only": { time: "HH:mm:ss"}, 
     "12h Time only": { time: "h:mm a"} 
 };
@@ -237,13 +237,13 @@ function updateClock() {
             dateString = `${day}.${monthNumeric}.${year}`;
         } else if (selectedFormat.includes("dd MMM yyyy")) {
             dateString = `${day} ${monthShort} ${year}`;
-        } else if (selectedFormat.includes("MM/dd/yyyy")) {
+        } else if (selectedFormat.includes("MM.dd.yyyy")) {
             dateString = `${monthNumeric}.${day}.${year}`;
         } else if (selectedFormat.includes("MMM dd yyyy")) {
             dateString = `${monthShort} ${day} ${year}`;
         }
     }
-    let timeMode = SIMPLE_CLOCK_USE_UTC ? "UTC" : "Local";
+    let timeMode = SIMPLE_CLOCK_USE_UTC ? "UTC" : "Server";
     let SyncStatusValue = (SERVER_SYNC === 'client') ? '⚠️' : ''; 
 
     let syncStatusElement = clockWidget.find('.synk-status');
@@ -253,7 +253,7 @@ function updateClock() {
         let panelContainer = $(".dashboard-panel .panel-100-real .dashboard-panel-plugin-content");
         let widgetHtml = `
             <div id='custom-clock-widget' class='flex-container flex-center hide-phone hover-brighten br-15'
-                style='position: relative; height: 50px; width: 125px; padding: 2px; text-align: center; display: flex; flex-direction: column; gap: 0px !important; user-select: none;'
+                style='position: relative; height: 50px; width: 125px; padding: 0px; text-align: center; display: flex; flex-direction: column; gap: 0px !important; user-select: none;'
                 data-tooltip-disabled='true'>
                 <!-- Only show timeMode if HIDE_TIME_MODE is false -->
                 ${HIDE_TIME_MODE ? '' : `<span class='color-4 m-0 clock-mode'
@@ -406,7 +406,7 @@ function updateTooltip() {
 function updateDynText() {
     clearTimeout(updateDynTextTimeout);
     function getCurrentMode() {
-        return SIMPLE_CLOCK_USE_UTC ? "UTC" : "Local";
+        return SIMPLE_CLOCK_USE_UTC ? "UTC" : "Server";
     }
 
     function cycleMessages() {
