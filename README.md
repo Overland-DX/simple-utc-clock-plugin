@@ -58,7 +58,7 @@ This plugin is open-source and free to use. Feel free to contribute or modify it
 📌 Version: 1.05.2: (Current)<br>
  - Fixed Time format names. And changed name from Local time to Server time,
  so that no one misunderstands that the time shown is the local time where the server is. (added in v1.05.01) 
- - Added more time format. ("24h yyyy.MM.dd", "24h yyyy.MMM.dd", "12h yyyy.MM.dd")
+ - Added more time format. ("24h yyyy.MM.dd", "24h yyyy MMM dd", "12h yyyy.MM.dd")
  - Removed "24h and 12h time only" for now. We will try to add back only clock later.
 
 
