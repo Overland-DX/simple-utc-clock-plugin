@@ -55,7 +55,16 @@ Notes
 
 This plugin is open-source and free to use. Feel free to contribute or modify it as needed. If you encounter issues, please open a ticket in the GitHub repository.
 <br><br><br><br><br><br><br>
-📌 Version: 1.05.0: (Current, and hopefully final version)<br>
+📌 Version: 1.05.2: (Current)<br>
+ - Fixed Time format names. And changed name from Local time to Server time,
+ so that no one misunderstands that the time shown is the local time where the server is. (added in v1.05.01) 
+ - Added more time format. ("24h yyyy.MM.dd", "24h yyyy.MMM.dd", "12h yyyy.MM.dd")
+ - Removed "24h and 12h time only" for now. We will try to add back only clock later.
+
+
+
+<br><br>
+Version: 1.05.0:<br>
  - Added dynamic text in tooltip. The current time mode as UTC or Local is now displayed in the tooltip. Plus other relevant information.
  - Added new options in plugin settings, which give the server owner the ability to decide what the user can do. Such as changing the size of the clock, hiding "UTC"/"Local" that is displayed above the clock.
  - Added more time formats.
