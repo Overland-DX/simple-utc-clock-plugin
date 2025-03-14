@@ -1,5 +1,5 @@
 (() => {
-// Simple Clock v1.05.1
+// Simple Clock v1.05.2
 // For FM-DX-Webserver v1.3.5 or later.
 // This is open source code. Feel free to do whatever you want with it.
 
@@ -24,7 +24,7 @@ let TIME_SERVER_RESPONSE = "utc_time";  // Change the time server response strin
 
 
 // Below is the main code. Please do not change anything unless you know what you are doing.
-const CURRENT_VERSION = "1.05.1";
+const CURRENT_VERSION = "1.05.2";
 
 if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
     let SIMPLE_CLOCK_FONT_SIZE_SCALE = parseInt(localStorage.getItem("SIMPLE_CLOCK_FONT_SIZE_SCALE"));
@@ -75,8 +75,9 @@ const TIME_FORMATS = {
     "24h MM.dd.yyyy": { time: "HH:mm:ss", date: "MM.dd.yyyy" }, 
     "24h MMM dd yyyy": { time: "HH:mm:ss", date: "MMM dd yyyy" }, 
     "12h MM.dd.yyyy": { time: "hh:mm a", date: "MM.dd.yyyy" }, 
-    "24h Time only": { time: "HH:mm:ss"}, 
-    "12h Time only": { time: "h:mm a"} 
+    "24h yyyy.MM.dd": { time: "HH:mm:ss", date: "yyyy.MM.dd" }, 
+    "24h yyyy MMM dd": { time: "HH:mm:ss", date: "yyyy MMM dd" }, 
+    "12h yyyy.MM.dd": { time: "hh:mm a", date: "yyyy.MM.dd" }
 };
 
 let SERVER_SYNC = 'unknown'; 
@@ -241,6 +242,10 @@ function updateClock() {
             dateString = `${monthNumeric}.${day}.${year}`;
         } else if (selectedFormat.includes("MMM dd yyyy")) {
             dateString = `${monthShort} ${day} ${year}`;
+		} else if (selectedFormat.includes("yyyy.MM.dd")) {
+            dateString = `${year}.${monthNumeric}.${day}`;
+        } else if (selectedFormat.includes("yyyy MMM dd")) {
+            dateString = `${year} ${monthShort} ${day}`;
         }
     }
     let timeMode = SIMPLE_CLOCK_USE_UTC ? "UTC" : "Server";
@@ -417,7 +422,7 @@ function updateDynText() {
         } else if (DISPLAY_MODE === "local") {
             displayModeMessage = "Displays Server Time (Locked)";
         } else {
-            displayModeMessage = `Displays ${currentMode} time.`;
+            displayModeMessage = `Displays ${currentMode} Time.`;
         }
 
         DynTekst_show = displayModeMessage;
