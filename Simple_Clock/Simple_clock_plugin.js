@@ -1,30 +1,73 @@
-(() => {
-// Simple Clock v1.05.2
-// For FM-DX-Webserver v1.3.5 or later.
-// This is open source code. Feel free to do whatever you want with it.
+(() => { /*
+
+Simple Clock v1.05.3
+For FM-DX-Webserver v1.3.5 or later.
+This is open source code. Feel free to do whatever you want with it.
 
 
-// Configuration
-let DISPLAY_MODE = "auto";  // "auto" = Users can switch, "local" = Only local time, "utc" = Only UTC. Default is "auto"
-const DEFAULT_CLOCK_SIZE_SCALE = 3;  // Set the default value for the clock size. Between 1 and 5 are allowed.
-const ALLOW_USER_CLOCK_SIZE_CHANGE = true; // Set to false if users should not be able to change clock size. Default is true.
-let PLUGIN_POSITION = "after"; // "after" or "before" other plugins in the rigth area on topbar.
-const HIDE_CLOCK_ON_MOBILE = false; // Set to true; if you want to hide clock from be displayed on the mobile. Default is false.
-const HIDE_TIME_MODE = false; // Set to true to hide the UTC/Local which is displayed above the clock. Default is false.
+Step 1:
+If you only want UTC time to be displayed, you don't need to change anything in the setting.
 
-
-// Time settings: 
-let LOCAL_TIMEZONE = "Europe/London";  // Set the desired timezone. For example: "Europe/London" or "Etc/GMT-1" for zone UTC+01:00.
+Step 2:
+If you want to display only local server time, use "local" in DISPLAY_MODE. If you want to display both UTC time and Server time, use "auto" in DISPLAY_MODE.
+For local server time to be displayed correctly, you must also select your time zone in LOCAL_TIMEZONE.
+And if your area uses daylight saving time, you must set USE_DST to "true"
+*/
+let DISPLAY_MODE = "utc";  // "auto" = Users can switch, "local" = Only local Server time, "utc" = Only UTC time. Default is "utc"
+let LOCAL_TIMEZONE = "Etc/GMT+0";  // Set the desired timezone. For example: "Europe/London" for UK, or "Etc/GMT-1" for zone UTC+01:00.
 let USE_DST = true;  // Important if you use GMT as a zone that uses daylight saving time. Valid usage: true or false
+/*
+Note!
+If you are unsure which time zone to use, you can find some tips/info here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+
+
+
+Step 3: Customize the Simple Clock (Optional)
+*/
+const DEFAULT_CLOCK_SIZE_SCALE = 3;  // Set the default value for the clock size. Between 1 and 5 are allowed.
+let PLUGIN_POSITION = "after"; // "after" or "before" other plugins in the rigth area on the topbar.
+let TOOLTIP_MODE = "normal"; // Choose "limited" tooltip or "normal" tooltip. "limited" shows only time mode while "normal" shows time mode + dynamic data. Default is "normal".
+const HIDE_CLOCK_ON_MOBILE = false; // Set to true; if you want to hide clock from be displayed on the mobile. Default is false.
+const HIDE_TIME_MODE = false; // Set to true to hide the UTC (icon/text) which is displayed above the clock. Default is false.
+let SHOW_SECONDS = true; // Show clock seconds. true = shows seconds, false = hides seconds.
+const DEFAULT_TIME_FORMAT = "24h dd MMM yyyy"; // Set the default clock format. Default is preset to "24h dd MMM yyyy"
+/*
+************************************************************************************************************************
+* 												Available time formats:												   *
+************************************************************************************************************************
+*1   "24h dd.MM.yyyy":   Shows 24 hour clock and date day.month.year, for example: (14:40:30 | 03.05.2025)			  1*
+*2   "24h dd MMM yyyy":  Shows 24 hour clock and date day month year, for example: (14:40:30 | 03 May 2025)			  2*
+*3   "12h dd.MM.yyyy":   Shows 12 hour clock and date day.month.year, for example: (PM 02:40:30 | 03.05.2025)		  3*
+*4   "24h MM.dd.yyyy":   Shows 24 hour clock and date month.day.year, for example: (14:40:30 | 05.03.2025)			  4*
+*5   "24h MMM dd yyyy":  Shows 24 hour clock and date monthvday year, for example: (14:40:30 | May 03 2025)			  5*
+*6   "12h MM.dd.yyyy":   Shows 12 hour clock and date month.day.year, for example: (PM 02:40:30 | 05.03.2025)		  6*
+*7   "24h yyyy.MM.dd":   Shows 24 hour clock and date year.month.day, for example: (14:40:30 | 2025.05.03)			  7*
+*8   "24h yyyy MMM dd":  Shows 24 hour clock and date year month day, for example: (14:40:30 | 2025 May 03)			  8*
+*9   "12h yyyy.MM.dd":   Shows 24 hour clock and date year.month.day, for example: (PM 02:40:30 | 2025.05.03)		  9*
+*10  "24h Time Only":    Shows only 24 hour clock and no date, for example: (14:40:30)								 10*
+************************************************************************************************************************
+*/
+
+// The API_SERVER_ADDRESS and TIME_SERVER_RESPONSE settings are only need to be changed if you are going to use your own time-server API.
 let API_SERVER_ADDRESS = "time.fmdx.no"; // URL to timeserver, do not include http:// or https://. You can use any server API as long as it follows ISO 8601 format.
 let TIME_SERVER_RESPONSE = "utc_time";  // Change the time server response string.
 // For example, if the time server's api looks like this "utc_time": "2025-03-02T15:02:20Z", then you should use "utc_time"
+
+/*
+Step 4: What can the user do? (Optional)
+*/
+const ALLOW_USER_CLOCK_SIZE_CHANGE = false; // Set to true if users should be able to change clock size. Default is false.
+const HIDE_TIME_FORMAT_DROPDOWN = true; // Set to false to show the clock format dropdown in sidesettings. Default is true.
+
+
+
+
 
 
 
 
 // Below is the main code. Please do not change anything unless you know what you are doing.
-const CURRENT_VERSION = "1.05.2";
+const CURRENT_VERSION = "1.05.3";
 
 if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
     let SIMPLE_CLOCK_FONT_SIZE_SCALE = parseInt(localStorage.getItem("SIMPLE_CLOCK_FONT_SIZE_SCALE"));
@@ -61,12 +104,13 @@ if (isNaN(WIDGET_WIDTH_SCALE) || WIDGET_WIDTH_SCALE < 1 || WIDGET_WIDTH_SCALE > 
 }
 
 let SIMPLE_CLOCK_USE_UTC = DISPLAY_MODE === "utc" ? true : DISPLAY_MODE === "local" ? false : (localStorage.getItem("SIMPLE_CLOCK_USE_UTC") === "true");
-let serverTimeZone_show = LOCAL_TIMEZONE;
+let serverTimeZone_show = LOCAL_TIMEZONE || "Etc/GMT+0";
 let serverTime = new Date();
 let lastSync = Date.now();
 let TIME_SERVER_FAILED = false;
 let timeProtocol = window.location.protocol === 'https:' ? 'https' : 'http';
 let TIME_SERVER = `${timeProtocol}://${API_SERVER_ADDRESS}`;
+
 
 const TIME_FORMATS = {
     "24h dd.MM.yyyy": { time: "HH:mm:ss", date: "dd.MM.yyyy" }, 
@@ -77,7 +121,8 @@ const TIME_FORMATS = {
     "12h MM.dd.yyyy": { time: "hh:mm a", date: "MM.dd.yyyy" }, 
     "24h yyyy.MM.dd": { time: "HH:mm:ss", date: "yyyy.MM.dd" }, 
     "24h yyyy MMM dd": { time: "HH:mm:ss", date: "yyyy MMM dd" }, 
-    "12h yyyy.MM.dd": { time: "hh:mm a", date: "yyyy.MM.dd" }
+    "12h yyyy.MM.dd": { time: "hh:mm a", date: "yyyy.MM.dd" },
+	"24h Time Only": { time: "HH:mm:ss"}
 };
 
 let SERVER_SYNC = 'unknown'; 
@@ -124,10 +169,16 @@ function AdditionalCheckboxesHideClock() {
         toggleClockVisibility();
     });
 }
-
+if (!localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT")) {
+    localStorage.setItem("SIMPLE_CLOCK_CLOCK_FORMAT", DEFAULT_TIME_FORMAT);
+}
 function AdditionalDropdownClockFormat() {
     $("#clock-format-container").remove();
     const panelFull = $('.panel-full.flex-center.no-bg.m-0').first();
+
+    // Hvis HIDE_TIME_FORMAT_DROPDOWN er true, ikke legg til dropdown
+    if (HIDE_TIME_FORMAT_DROPDOWN) return;
+
     if (panelFull.length) {
         panelFull.after(`
             <div id="clock-format-container" class="form-group">
@@ -144,27 +195,26 @@ function AdditionalDropdownClockFormat() {
         `);
     }
 
+    // Hent lagret format fra localStorage (nå garantert å eksistere)
+    let savedFormat = localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT");
+
+    // Sett valgt format i input-feltet
+    $("#clock-format-input").val(savedFormat);
+
     $("#clock-format-input").click(function() {
-        const options = $("#clock-format-options");
-        options.toggleClass("opened");
+        $("#clock-format-options").toggleClass("opened");
     });
 
     $("#clock-format-options .option").click(function() {
         let selectedFormat = $(this).data("value");
-        if ($(this).attr("id") === "hide-clock-option") {
-            let isHidden = localStorage.getItem("SIMPLE_CLOCK_HIDE_CLOCK") === "true";
-            localStorage.setItem("SIMPLE_CLOCK_HIDE_CLOCK", isHidden ? "false" : "true");
-            toggleClockVisibility();
-            $(this).text(isHidden ? "Hide Clock" : "Show Clock");
-        } else {
-            localStorage.setItem("SIMPLE_CLOCK_CLOCK_FORMAT", selectedFormat);
-            $("#clock-format-input").val($(this).text());
-            updateClock();
-        }
+
+        // Lagre valgt format i localStorage
+        localStorage.setItem("SIMPLE_CLOCK_CLOCK_FORMAT", selectedFormat);
+        $("#clock-format-input").val(selectedFormat);
+        updateClock();
+
         $("#clock-format-options").removeClass("opened");
     });
-    let savedFormat = localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT") || Object.keys(TIME_FORMATS)[0];
-    $("#clock-format-input").val(savedFormat);
 }
 
 function toggleClockVisibility() {
@@ -200,22 +250,22 @@ function updateClock() {
     let format = TIME_FORMATS[selectedFormat];
     let clockWidget = $('#custom-clock-widget');
     let is12HourFormat = format.time.includes('a');
-    let fullTime = new Intl.DateTimeFormat('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-        timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
-    }).format(now);
+	let fullTime = new Intl.DateTimeFormat('en-US', {
+		hour: '2-digit',
+		minute: '2-digit',
+		second: SHOW_SECONDS ? '2-digit' : undefined,  // Skjuler sekunder hvis SHOW_SECONDS er false
+		hour12: true,
+		timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
+	}).format(now);
     let [time, amPmText] = fullTime.split(' ');
     if (!is12HourFormat) {
-        time = new Intl.DateTimeFormat('en-GB', {
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false,
-            timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
-        }).format(now);
+			time = new Intl.DateTimeFormat('en-GB', {
+			hour: '2-digit',
+			minute: '2-digit',
+			second: SHOW_SECONDS ? '2-digit' : undefined, // Skjuler sekunder hvis SHOW_SECONDS er false
+			hour12: false,
+			timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
+		}).format(now);
         amPmText = "";
     }
     let amPmElement = clockWidget.find('.clock-am-pm');
@@ -248,7 +298,7 @@ function updateClock() {
             dateString = `${year} ${monthShort} ${day}`;
         }
     }
-    let timeMode = SIMPLE_CLOCK_USE_UTC ? "UTC" : "Server";
+    let timeMode = SIMPLE_CLOCK_USE_UTC ? "UTC" : "";
     let SyncStatusValue = (SERVER_SYNC === 'client') ? '⚠️' : ''; 
 
     let syncStatusElement = clockWidget.find('.synk-status');
@@ -289,7 +339,11 @@ function updateClock() {
         }
 		clockWidget.find('.clock-time').text(time);
 		clockWidget.find('.clock-mode').text(timeMode);
-		let tooltipText = DynTekst_show + "\n" + DynTekst_show2;
+		let tooltipText = DynTekst_show;
+		if (TOOLTIP_MODE === "normal") {
+			tooltipText += "\n" + DynTekst_show2;
+		}
+
 		clockWidget.attr('data-tooltip-content', tooltipText);
 		}
 
@@ -349,6 +403,11 @@ function updateClock() {
 						gap: 0px !important;
 						flex-direction: column;
 					}
+						.clock-time, .clock-date {
+						line-height: 0.7 !important;
+						margin: 2px 0 !important;
+						padding: 0 !important;
+					}
 				}
 			`)
 			.appendTo("head");
@@ -383,8 +442,13 @@ function updateDynText2() {
         "TimeZone: " + serverTimeZone_show,
         syncStatusText,
         "Simple Clock v" + PLUGIN_INFO.version,
-        "Click to change time mode"
     ];
+    if (DISPLAY_MODE === "auto") {
+        texts.push("Click to change UTC/Server time mode");
+    }
+    if (ALLOW_USER_CLOCK_SIZE_CHANGE === true) {
+        texts.push("Use the mouse wheel to change size.");
+    }
 
     let index = 0;
     function cycleExtraMessages() {
@@ -404,7 +468,10 @@ fetchServerTime().then(() => {
 });
 
 function updateTooltip() {
-    let tooltipText = DynTekst_show + "\n" + DynTekst_show2;
+		let tooltipText = DynTekst_show;
+		if (TOOLTIP_MODE === "normal") {
+			tooltipText += "\n" + DynTekst_show2;
+		}
     $('#custom-clock-widget').attr('data-tooltip-content', tooltipText);
 }
 
