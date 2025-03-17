@@ -55,7 +55,18 @@ Notes
 
 This plugin is open-source and free to use. Feel free to contribute or modify it as needed. If you encounter issues, please open a ticket in the GitHub repository.
 <br><br><br><br><br><br><br>
-📌 Version: 1.05.2: (Current)<br>
+📌 Version: 1.05.3: (Current)<br>
+ - Fixed so clock and date is displayed correctly in mobile view.
+ - Added back 24h clock only format.<br>*The clock can now be displayed without the "UTC" icon/text above the clock.
+ - Removed "Server" which was displayed above the clock for Server time mode.<br>*Server time mode will still be displayed in the tooltip. UTC is not affected.
+ - Added more options to customize the clock (server side)<br> * Added option for shortened tooltip.<br> * You can now hide seconds in the clock.<br> *
+ You can now set a default preset time format.<br> * You can remove the ability for the user to choose the format themselves.(This will hide the Simple clock format dropdown for users in sidepanel setting.)
+ - Simplified the plugin config and better explains what changes will do.
+ - You can now use the plugin without changing any settings.<br>*In this case, the time will be displayed in UTC time only.
+<br>*If you want local server time and other options, this must be set up in config.
+
+<br><br>
+Version: 1.05.2:<br>
  - Fixed Time format names. And changed name from Local time to Server time,
  so that no one misunderstands that the time shown is the local time where the server is. (added in v1.05.01) 
  - Added more time format. ("24h yyyy.MM.dd", "24h yyyy MMM dd", "12h yyyy.MM.dd")
