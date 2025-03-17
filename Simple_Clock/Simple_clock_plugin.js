@@ -176,7 +176,6 @@ function AdditionalDropdownClockFormat() {
     $("#clock-format-container").remove();
     const panelFull = $('.panel-full.flex-center.no-bg.m-0').first();
 
-    // Hvis HIDE_TIME_FORMAT_DROPDOWN er true, ikke legg til dropdown
     if (HIDE_TIME_FORMAT_DROPDOWN) return;
 
     if (panelFull.length) {
@@ -195,10 +194,8 @@ function AdditionalDropdownClockFormat() {
         `);
     }
 
-    // Hent lagret format fra localStorage (nå garantert å eksistere)
     let savedFormat = localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT");
 
-    // Sett valgt format i input-feltet
     $("#clock-format-input").val(savedFormat);
 
     $("#clock-format-input").click(function() {
@@ -208,7 +205,6 @@ function AdditionalDropdownClockFormat() {
     $("#clock-format-options .option").click(function() {
         let selectedFormat = $(this).data("value");
 
-        // Lagre valgt format i localStorage
         localStorage.setItem("SIMPLE_CLOCK_CLOCK_FORMAT", selectedFormat);
         $("#clock-format-input").val(selectedFormat);
         updateClock();
@@ -253,7 +249,7 @@ function updateClock() {
 	let fullTime = new Intl.DateTimeFormat('en-US', {
 		hour: '2-digit',
 		minute: '2-digit',
-		second: SHOW_SECONDS ? '2-digit' : undefined,  // Skjuler sekunder hvis SHOW_SECONDS er false
+		second: SHOW_SECONDS ? '2-digit' : undefined,
 		hour12: true,
 		timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
 	}).format(now);
@@ -262,7 +258,7 @@ function updateClock() {
 			time = new Intl.DateTimeFormat('en-GB', {
 			hour: '2-digit',
 			minute: '2-digit',
-			second: SHOW_SECONDS ? '2-digit' : undefined, // Skjuler sekunder hvis SHOW_SECONDS er false
+			second: SHOW_SECONDS ? '2-digit' : undefined, 
 			hour12: false,
 			timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
 		}).format(now);
@@ -278,7 +274,7 @@ function updateClock() {
     let monthIndex = now.getMonth();
     let year = now.getFullYear();
 
-    let monthShort = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(now).replace('.', ''); // Fjerner punktum
+    let monthShort = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(now).replace('.', ''); 
     let monthNumeric = (monthIndex + 1).toString().padStart(2, '0');
 
     let dateString = '';
