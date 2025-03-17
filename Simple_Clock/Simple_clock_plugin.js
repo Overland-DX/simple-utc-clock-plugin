@@ -246,22 +246,22 @@ function updateClock() {
     let format = TIME_FORMATS[selectedFormat];
     let clockWidget = $('#custom-clock-widget');
     let is12HourFormat = format.time.includes('a');
-	let fullTime = new Intl.DateTimeFormat('en-US', {
-		hour: '2-digit',
-		minute: '2-digit',
-		second: SHOW_SECONDS ? '2-digit' : undefined,
-		hour12: true,
-		timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
-	}).format(now);
+    let fullTime = new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: SHOW_SECONDS ? '2-digit' : undefined,
+        hour12: true,
+        timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
+    }).format(now);
     let [time, amPmText] = fullTime.split(' ');
     if (!is12HourFormat) {
-			time = new Intl.DateTimeFormat('en-GB', {
-			hour: '2-digit',
-			minute: '2-digit',
-			second: SHOW_SECONDS ? '2-digit' : undefined, 
-			hour12: false,
-			timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
-		}).format(now);
+        time = new Intl.DateTimeFormat('en-GB', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: SHOW_SECONDS ? '2-digit' : undefined,
+            hour12: false,
+            timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
+        }).format(now);
         amPmText = "";
     }
     let amPmElement = clockWidget.find('.clock-am-pm');
@@ -270,35 +270,40 @@ function updateClock() {
     } else {
         amPmElement.hide();
     }
-    let day = now.getDate().toString().padStart(2, '0');
-    let monthIndex = now.getMonth();
-    let year = now.getFullYear();
 
-    let monthShort = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(now).replace('.', ''); 
-    let monthNumeric = (monthIndex + 1).toString().padStart(2, '0');
+    let dateFormatter = new Intl.DateTimeFormat('en-US', {
+        day: '2-digit',
+        month: format.date.includes('MMM') ? 'short' : '2-digit',
+        year: 'numeric',
+        timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
+    });
+    let dateParts = dateFormatter.formatToParts(now);
+    let day = dateParts.find(part => part.type === 'day').value;
+    let month = dateParts.find(part => part.type === 'month').value;
+    let year = dateParts.find(part => part.type === 'year').value;
 
     let dateString = '';
-
     if (format.date) {
         if (selectedFormat.includes("dd.MM.yyyy")) {
-            dateString = `${day}.${monthNumeric}.${year}`;
+            dateString = `${day}.${month}.${year}`;
         } else if (selectedFormat.includes("dd MMM yyyy")) {
-            dateString = `${day} ${monthShort} ${year}`;
+            dateString = `${day} ${month} ${year}`;
         } else if (selectedFormat.includes("MM.dd.yyyy")) {
-            dateString = `${monthNumeric}.${day}.${year}`;
+            dateString = `${month}.${day}.${year}`;
         } else if (selectedFormat.includes("MMM dd yyyy")) {
-            dateString = `${monthShort} ${day} ${year}`;
-		} else if (selectedFormat.includes("yyyy.MM.dd")) {
-            dateString = `${year}.${monthNumeric}.${day}`;
+            dateString = `${month} ${day} ${year}`;
+        } else if (selectedFormat.includes("yyyy.MM.dd")) {
+            dateString = `${year}.${month}.${day}`;
         } else if (selectedFormat.includes("yyyy MMM dd")) {
-            dateString = `${year} ${monthShort} ${day}`;
+            dateString = `${year} ${month} ${day}`;
         }
     }
+
     let timeMode = SIMPLE_CLOCK_USE_UTC ? "UTC" : "";
-    let SyncStatusValue = (SERVER_SYNC === 'client') ? '⚠️' : ''; 
+    let SyncStatusValue = (SERVER_SYNC === 'client') ? '⚠️' : '';
 
     let syncStatusElement = clockWidget.find('.synk-status');
-    syncStatusElement.html(SyncStatusValue).show();  
+    syncStatusElement.html(SyncStatusValue).show();
 
     if (!clockWidget.length) {
         let panelContainer = $(".dashboard-panel .panel-100-real .dashboard-panel-plugin-content");
@@ -333,53 +338,53 @@ function updateClock() {
         } else {
             clockWidget.find('.clock-date').text("");
         }
-		clockWidget.find('.clock-time').text(time);
-		clockWidget.find('.clock-mode').text(timeMode);
-		let tooltipText = DynTekst_show;
-		if (TOOLTIP_MODE === "normal") {
-			tooltipText += "\n" + DynTekst_show2;
-		}
+        clockWidget.find('.clock-time').text(time);
+        clockWidget.find('.clock-mode').text(timeMode);
+        let tooltipText = DynTekst_show;
+        if (TOOLTIP_MODE === "normal") {
+            tooltipText += "\n" + DynTekst_show2;
+        }
 
-		clockWidget.attr('data-tooltip-content', tooltipText);
-		}
+        clockWidget.attr('data-tooltip-content', tooltipText);
+    }
 
-	$("<style>")
-		.prop("type", "text/css")
-		.html(`
-		#custom-clock-widget[data-tooltip-disabled='true']:hover:after {
-			content: attr(data-tooltip-content) !important;
-			position: absolute !important;
-			top: 100% !important;
-			left: 50% !important;
-			transform: translateX(-50%) !important;
-			background-color: var(--color-2) !important;
-			border: 2px solid var(--color-3) !important;
-			color: var(--color-text) !important;
-			text-align: center !important;
-			font-size: 14px !important;
-			border-radius: 15px !important;
-			padding: 10px 20px !important;
-			z-index: 1000 !important;
-			opacity: 1 !important;
-			margin-top: 8px !important;
-			width: auto !important;
-			min-width: 270px !important;
-			max-width: 500px !important;
-			box-sizing: border-box !important;
-			word-wrap: break-word !important;
-			white-space: pre-line !important;
-			display: block !important;
-		}
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+        #custom-clock-widget[data-tooltip-disabled='true']:hover:after {
+            content: attr(data-tooltip-content) !important;
+            position: absolute !important;
+            top: 100% !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            background-color: var(--color-2) !important;
+            border: 2px solid var(--color-3) !important;
+            color: var(--color-text) !important;
+            text-align: center !important;
+            font-size: 14px !important;
+            border-radius: 15px !important;
+            padding: 10px 20px !important;
+            z-index: 1000 !important;
+            opacity: 1 !important;
+            margin-top: 8px !important;
+            width: auto !important;
+            min-width: 270px !important;
+            max-width: 500px !important;
+            box-sizing: border-box !important;
+            word-wrap: break-word !important;
+            white-space: pre-line !important;
+            display: block !important;
+        }
 
-		.no-tooltip {
-			pointer-events: none !important;
-		}
+        .no-tooltip {
+            pointer-events: none !important;
+        }
 
-		.no-tooltip * {
-			pointer-events: all !important;
-		}
-		`)
-		.appendTo("head");
+        .no-tooltip * {
+            pointer-events: all !important;
+        }
+        `)
+        .appendTo("head");
 
     $('#custom-clock-widget').css("width", (SIMPLE_CLOCK_FONT_SIZE_SCALE * 10 + 10) + "px");
     if (HIDE_CLOCK_ON_MOBILE && $(window).width() <= 768) {
@@ -388,41 +393,40 @@ function updateClock() {
         clockWidget.show();
     }
 
-		$("<style>")
-			.prop("type", "text/css")
-			.html(`
-				@media (max-width: 768px) {
-					#custom-clock-widget {
-						position: absolute;
-						left: 50%;
-						transform: translateX(-50%);
-						gap: 0px !important;
-						flex-direction: column;
-					}
-						.clock-time, .clock-date {
-						line-height: 0.7 !important;
-						margin: 2px 0 !important;
-						padding: 0 !important;
-					}
-				}
-			`)
-			.appendTo("head");
-		if (HIDE_CLOCK_ON_MOBILE) {
-			$("<style>")
-			.prop("type", "text/css")
-			.html(`
-				@media (max-width: 768px) {
-					#custom-clock-widget {
-						display: none !important;
-					}
-				}
-			`)
-			.appendTo("head");
-	}
+    $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            @media (max-width: 768px) {
+                #custom-clock-widget {
+                    position: absolute;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    gap: 0px !important;
+                    flex-direction: column;
+                }
+                    .clock-time, .clock-date {
+                    line-height: 0.7 !important;
+                    margin: 2px 0 !important;
+                    padding: 0 !important;
+                }
+            }
+        `)
+        .appendTo("head");
+    if (HIDE_CLOCK_ON_MOBILE) {
+        $("<style>")
+        .prop("type", "text/css")
+        .html(`
+            @media (max-width: 768px) {
+                #custom-clock-widget {
+                    display: none !important;
+                }
+            }
+        `)
+        .appendTo("head");
+    }
     toggleClockVisibility();
     updateFontSize();
 }
-
 let updateDynTextTimeout;
 let DynTekst_show = "";
 let updateDynText2Timeout;
