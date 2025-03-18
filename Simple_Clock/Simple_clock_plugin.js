@@ -271,19 +271,20 @@ function updateClock() {
         amPmElement.hide();
     }
 
-    let dateFormatter = new Intl.DateTimeFormat('en-US', {
-        day: '2-digit',
-        month: format.date.includes('MMM') ? 'short' : '2-digit',
-        year: 'numeric',
-        timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
-    });
-    let dateParts = dateFormatter.formatToParts(now);
-    let day = dateParts.find(part => part.type === 'day').value;
-    let month = dateParts.find(part => part.type === 'month').value;
-    let year = dateParts.find(part => part.type === 'year').value;
-
+    // Sjekk om formatet inneholder dato før vi prøver å formattere den
     let dateString = '';
     if (format.date) {
+        let dateFormatter = new Intl.DateTimeFormat('en-US', {
+            day: '2-digit',
+            month: format.date.includes('MMM') ? 'short' : '2-digit',
+            year: 'numeric',
+            timeZone: SIMPLE_CLOCK_USE_UTC ? "UTC" : LOCAL_TIMEZONE
+        });
+        let dateParts = dateFormatter.formatToParts(now);
+        let day = dateParts.find(part => part.type === 'day').value;
+        let month = dateParts.find(part => part.type === 'month').value;
+        let year = dateParts.find(part => part.type === 'year').value;
+
         if (selectedFormat.includes("dd.MM.yyyy")) {
             dateString = `${day}.${month}.${year}`;
         } else if (selectedFormat.includes("dd MMM yyyy")) {
@@ -427,6 +428,7 @@ function updateClock() {
     toggleClockVisibility();
     updateFontSize();
 }
+
 let updateDynTextTimeout;
 let DynTekst_show = "";
 let updateDynText2Timeout;
