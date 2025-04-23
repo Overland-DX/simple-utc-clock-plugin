@@ -1,6 +1,6 @@
 (() => { /*
 
-Simple Clock v1.05.3
+Simple Clock v1.05.4
 For FM-DX-Webserver v1.3.5 or later.
 This is open source code. Feel free to do whatever you want with it.
 
@@ -13,8 +13,8 @@ If you want to display only local server time, use "local" in DISPLAY_MODE. If y
 For local server time to be displayed correctly, you must also select your time zone in LOCAL_TIMEZONE.
 And if your area uses daylight saving time, you must set USE_DST to "true"
 */
-let DISPLAY_MODE = "utc";  // "auto" = Users can switch, "local" = Only local Server time, "utc" = Only UTC time. Default is "utc"
-let LOCAL_TIMEZONE = "Etc/GMT+0";  // Set the desired timezone. For example: "Europe/London" for UK, or "Etc/GMT-1" for zone UTC+01:00.
+let DISPLAY_MODE = "auto";  // "auto" = Users can switch, "local" = Only local Server time, "utc" = Only UTC time. Default is "utc"
+let LOCAL_TIMEZONE = "Etc/GMT-1";  // Set the desired timezone. For example: "Europe/London" for UK, or "Etc/GMT-1" for zone UTC+01:00.
 let USE_DST = true;  // Important if you use GMT as a zone that uses daylight saving time. Valid usage: true or false
 /*
 Note!
@@ -56,8 +56,8 @@ let TIME_SERVER_RESPONSE = "utc_time";  // Change the time server response strin
 /*
 Step 4: What can the user do? (Optional)
 */
-const ALLOW_USER_CLOCK_SIZE_CHANGE = false; // Set to true if users should be able to change clock size. Default is false.
-const HIDE_TIME_FORMAT_DROPDOWN = true; // Set to false to show the clock format dropdown in sidesettings. Default is true.
+const ALLOW_USER_CLOCK_SIZE_CHANGE = true; // Set to true if users should be able to change clock size. Default is false.
+const HIDE_TIME_FORMAT_DROPDOWN = false; // Set to false to show the clock format dropdown in sidesettings. Default is true.
 
 
 
@@ -67,7 +67,7 @@ const HIDE_TIME_FORMAT_DROPDOWN = true; // Set to false to show the clock format
 
 
 // Below is the main code. Please do not change anything unless you know what you are doing.
-const CURRENT_VERSION = "1.05.3";
+const CURRENT_VERSION = "1.05.4";
 
 if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
     let SIMPLE_CLOCK_FONT_SIZE_SCALE = parseInt(localStorage.getItem("SIMPLE_CLOCK_FONT_SIZE_SCALE"));
@@ -151,28 +151,15 @@ const PLUGIN_INFO = {
     version: CURRENT_VERSION,
 };
 
-function AdditionalCheckboxesHideClock() {
-    const checkboxes = $('.modal-panel-content .form-group.checkbox');
-    if (checkboxes.length) {
-        checkboxes.last().after(`
-            <div class='form-group checkbox'>
-                <input type='checkbox' id='hide-clock'>
-                <label for='hide-clock'>
-                    <i class='fa-solid fa-toggle-off m-right-10'></i> Hide Simple Clock
-                </label>
-            </div>
-        `);
-    }
-    let isClockHidden = localStorage.getItem("SIMPLE_CLOCK_HIDE_CLOCK") === "true";
-    $("#hide-clock").prop("checked", isClockHidden).change(function() {
-        localStorage.setItem("SIMPLE_CLOCK_HIDE_CLOCK", $(this).is(":checked"));
-        toggleClockVisibility();
-    });
-}
-if (!localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT")) {
-    localStorage.setItem("SIMPLE_CLOCK_CLOCK_FORMAT", DEFAULT_TIME_FORMAT);
-}
+
+
+
+
+
 function AdditionalDropdownClockFormat() {
+    if (!localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT")) {
+        localStorage.setItem("SIMPLE_CLOCK_CLOCK_FORMAT", DEFAULT_TIME_FORMAT);
+    }
     $("#clock-format-container").remove();
     const panelFull = $('.panel-full.flex-center.no-bg.m-0').first();
 
@@ -192,6 +179,17 @@ function AdditionalDropdownClockFormat() {
                 </div>
             </div>
         `);
+
+        // Legg til CSS inline via JavaScript
+        const style = document.createElement('style');
+        style.innerHTML = `
+            #clock-format-container label {
+                display: block;
+                text-align: center;
+                width: 100%;
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     let savedFormat = localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT");
@@ -211,6 +209,41 @@ function AdditionalDropdownClockFormat() {
 
         $("#clock-format-options").removeClass("opened");
     });
+}
+
+function addHideClockCheckbox() {
+    const imperialUnitsCheckbox = document.getElementById("imperial-units");
+
+    if (!imperialUnitsCheckbox) {
+        console.warn("Imperial units checkbox not found – kan ikke legge til 'Hide Clock'.");
+        return;
+    }
+
+    const id = "hide-clock";
+    const label = "Hide Simple Clock";
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "form-group";
+    wrapper.innerHTML = `
+        <div class="switch flex-container flex-phone flex-phone-column flex-phone-center">
+            <input type="checkbox" tabindex="0" id="${id}" aria-label="${label}" />
+            <label for="${id}"></label>
+            <span class="text-smaller text-uppercase text-bold color-4 p-10">${label.toUpperCase()}</span>
+        </div>
+    `;
+
+    // Sett knappen rett etter "Imperial units"
+    imperialUnitsCheckbox.closest('.form-group').insertAdjacentElement("afterend", wrapper);
+
+    const saved = localStorage.getItem("SIMPLE_CLOCK_HIDE_CLOCK") === "true";
+    document.getElementById(id).checked = saved;
+
+    document.getElementById(id).addEventListener("change", function () {
+        localStorage.setItem("SIMPLE_CLOCK_HIDE_CLOCK", this.checked);
+        toggleClockVisibility();
+    });
+
+    toggleClockVisibility();
 }
 
 function toggleClockVisibility() {
@@ -521,8 +554,9 @@ $(document).ready(() => {
     setInterval(updateClock, 1000);
     setInterval(fetchServerTime, 5 * 60 * 1000);
     $(document).on('click', '#custom-clock-widget', toggleTimeFormat);
-    AdditionalCheckboxesHideClock();
+//    AdditionalCheckboxesHideClock();
     AdditionalDropdownClockFormat();
+	setTimeout(addHideClockCheckbox, 200);
     toggleClockVisibility();
 
     if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
