@@ -24,7 +24,7 @@ Installation:
 
 Download or clone the repository.
 
-1. Place the file "Simple_Clock.js" and the folder "Simple_Clock" with its contents in the plugin folder on the server.
+1. Place the file "Simple_Clock.js" and the folder "Simple_Clock" with its contents in the plugin folder on the server and place "web" folder to the root of the dm-dx-webserver.
 2. Navigate to \plugin\Simple_Clock\ and open Simple_clock_plugin.js with your favorite text editor. Change the values at the top of the code according to your wishes and save the changes.
 3. Restart your server and activate the plugin in Admin Panel.
 <br><br>Note!<br>
@@ -55,7 +55,16 @@ Notes
 
 This plugin is open-source and free to use. Feel free to contribute or modify it as needed. If you encounter issues, please open a ticket in the GitHub repository.
 <br><br><br><br><br><br><br>
-📌 Version: 1.05.3: (Current)<br>
+
+📌 Version: 1.10.0: (Current)<br>
+ - Added fonts and colors. (4 fonts and 15 colors)
+ - Added ability to resize clock in mobile view. (Swipe left or right to change clock size)
+ - Increased to 8 clock sizes. (can be changed in settings)
+ - Fixed some bugs and optimized the design.
+ - Adapted to new version of FM-DX-Webserver 1.3.7. (This may cause incorrect display if you are using an older version of FM-DX-Webserver)
+
+<br><br>
+Version: 1.05.3:<br>
  - Fixed so clock and date is displayed correctly in mobile view.
  - Added back 24h clock only format.<br>*The clock can now be displayed without the "UTC" icon/text above the clock.
  - Removed "Server" which was displayed above the clock for Server time mode.<br>*Server time mode will still be displayed in the tooltip. UTC is not affected.
