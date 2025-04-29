@@ -1,6 +1,6 @@
 (() => { /*
 
-Simple Clock v1.10.0
+Simple Clock v1.10.1
 For FM-DX-Webserver v1.3.5 or later.
 This is open source code. Feel free to do whatever you want with it.
 
@@ -70,7 +70,7 @@ let TIME_SERVER_RESPONSE = "utc_time";  // Change the time server response strin
 
 
 // Below is the main code. Please do not change anything unless you know what you are doing.
-const CURRENT_VERSION = "1.10.0";
+const CURRENT_VERSION = "1.10.1";
 
 const COLOR_PRESETS = {
     "Theme Color": "auto",
@@ -90,41 +90,65 @@ const COLOR_PRESETS = {
     "Concrete": "#7f8c8d"
 };
 
-if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
-    let SIMPLE_CLOCK_FONT_SIZE_SCALE = parseInt(localStorage.getItem("SIMPLE_CLOCK_FONT_SIZE_SCALE"));
-    if (isNaN(SIMPLE_CLOCK_FONT_SIZE_SCALE) || SIMPLE_CLOCK_FONT_SIZE_SCALE < 0 || SIMPLE_CLOCK_FONT_SIZE_SCALE > 7) {
-        SIMPLE_CLOCK_FONT_SIZE_SCALE = DEFAULT_CLOCK_SIZE_SCALE;
-        localStorage.setItem("SIMPLE_CLOCK_FONT_SIZE_SCALE", DEFAULT_CLOCK_SIZE_SCALE);
+function migrateOldKeys() {
+    const migrations = {
+        "SIMPLE_CLOCK_FONT_SIZE_SCALE": "sc-font-size",
+        "SIMPLE_CLOCK_USE_UTC": "sc-use-utc",
+        "SIMPLE_CLOCK_CLOCK_FORMAT": "sc-format",
+        "SIMPLE_CLOCK_HIDE_CLOCK": "sc-hide",
+        "SIMPLE_CLOCK_PLUGIN_VERSION": "sc-version",
+        "CLOCK_FONT_INDEX": "sc-font-index",
+        "CLOCK_COLOR_INDEX": "sc-color-index",
+        "WIDGET_WIDTH_SCALE": "sc-widget-width",
+    };
+
+    for (const [oldKey, newKey] of Object.entries(migrations)) {
+        const oldValue = localStorage.getItem(oldKey);
+        if (oldValue !== null) {
+            console.log(`Migrating ${oldKey} → ${newKey}`);
+            localStorage.setItem(newKey, oldValue);
+            localStorage.removeItem(oldKey);
+        }
     }
 }
 
-if (!localStorage.getItem("SIMPLE_CLOCK_PLUGIN_VERSION") || 
-    localStorage.getItem("SIMPLE_CLOCK_PLUGIN_VERSION") !== CURRENT_VERSION) {   
-    console.log("Ingen eller gammel versjon oppdaget – rydder opp lokal lagring...");
-    const OBSOLETE_KEYS = ["SIMPLE_CLOCK_CLOCK_FORMAT", "SIMPLE_CLOCK_FONT_SIZE_SCALE", "SIMPLE_CLOCK_USE_UTC", "SIMPLE_CLOCK_HIDE_CLOCK"];
-    OBSOLETE_KEYS.forEach(key => localStorage.removeItem(key));
-    localStorage.setItem("SIMPLE_CLOCK_PLUGIN_VERSION", CURRENT_VERSION);
+migrateOldKeys();
+
+if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
+    let SIMPLE_CLOCK_FONT_SIZE_SCALE = parseInt(localStorage.getItem("sc-font-size"));
+    if (isNaN(SIMPLE_CLOCK_FONT_SIZE_SCALE) || SIMPLE_CLOCK_FONT_SIZE_SCALE < 0 || SIMPLE_CLOCK_FONT_SIZE_SCALE > 7) {
+        SIMPLE_CLOCK_FONT_SIZE_SCALE = DEFAULT_CLOCK_SIZE_SCALE;
+        localStorage.setItem("sc-font-size", DEFAULT_CLOCK_SIZE_SCALE);
+    }
 }
 
-let SIMPLE_CLOCK_FONT_SIZE_SCALE = parseInt(localStorage.getItem("SIMPLE_CLOCK_FONT_SIZE_SCALE"));
+if (!localStorage.getItem("sc-version") || 
+    localStorage.getItem("sc-version") !== CURRENT_VERSION) {   
+    console.log("Ingen eller gammel versjon oppdaget – rydder opp lokal lagring...");
+    const OBSOLETE_KEYS = ["sc-format", "sc-font-size", "sc-use-utc", "sc-hide"];
+    OBSOLETE_KEYS.forEach(key => localStorage.removeItem(key));
+    localStorage.setItem("sc-version", CURRENT_VERSION);
+}
+
+let SIMPLE_CLOCK_FONT_SIZE_SCALE = parseInt(localStorage.getItem("sc-font-size"));
 
 if (isNaN(SIMPLE_CLOCK_FONT_SIZE_SCALE) || SIMPLE_CLOCK_FONT_SIZE_SCALE < 0 || SIMPLE_CLOCK_FONT_SIZE_SCALE > 7) {
     SIMPLE_CLOCK_FONT_SIZE_SCALE = DEFAULT_CLOCK_SIZE_SCALE;
-    localStorage.setItem("SIMPLE_CLOCK_FONT_SIZE_SCALE", DEFAULT_CLOCK_SIZE_SCALE);
+    localStorage.setItem("sc-font-size", DEFAULT_CLOCK_SIZE_SCALE);
 }
 
 if (!ALLOW_USER_CLOCK_SIZE_CHANGE) {
     SIMPLE_CLOCK_FONT_SIZE_SCALE = DEFAULT_CLOCK_SIZE_SCALE;
-    localStorage.setItem("SIMPLE_CLOCK_FONT_SIZE_SCALE", DEFAULT_CLOCK_SIZE_SCALE);
+    localStorage.setItem("sc-font-size", DEFAULT_CLOCK_SIZE_SCALE);
 }
 
 let WIDGET_WIDTH_SCALE = SIMPLE_CLOCK_FONT_SIZE_SCALE;
 if (isNaN(WIDGET_WIDTH_SCALE) || WIDGET_WIDTH_SCALE < 0 || WIDGET_WIDTH_SCALE > 7) {
     WIDGET_WIDTH_SCALE = SIMPLE_CLOCK_FONT_SIZE_SCALE;
-    localStorage.setItem("WIDGET_WIDTH_SCALE", WIDGET_WIDTH_SCALE);
+    localStorage.setItem("sc-widget-width", WIDGET_WIDTH_SCALE);
 }
 
-let SIMPLE_CLOCK_USE_UTC = DISPLAY_MODE === "utc" ? true : DISPLAY_MODE === "local" ? false : (localStorage.getItem("SIMPLE_CLOCK_USE_UTC") === "true");
+let SIMPLE_CLOCK_USE_UTC = DISPLAY_MODE === "utc" ? true : DISPLAY_MODE === "local" ? false : (localStorage.getItem("sc-use-utc") === "true");
 let serverTimeZone_show = LOCAL_TIMEZONE || "Etc/GMT+0";
 let serverTime = new Date();
 let lastSync = Date.now();
@@ -143,18 +167,18 @@ const FONT_STYLES = ["standard", "font1", "font2", "font3", "font4"];
 
 const COLOR_MODES = Object.values(COLOR_PRESETS);
 
-let currentFontIndex = parseInt(localStorage.getItem("CLOCK_FONT_INDEX"));
+let currentFontIndex = parseInt(localStorage.getItem("sc-font-index"));
 if (isNaN(currentFontIndex) || !ALLOW_USER_CLOCK_FONT_CHANGE) {
     currentFontIndex = DEFAULT_FONT_INDEX;
-    localStorage.setItem("CLOCK_FONT_INDEX", currentFontIndex);
+    localStorage.setItem("sc-font-index", currentFontIndex);
 }
 
 
-let savedColorIndex = parseInt(localStorage.getItem("CLOCK_COLOR_INDEX"));
+let savedColorIndex = parseInt(localStorage.getItem("sc-color-index"));
 let defaultIndex = Object.keys(COLOR_PRESETS).indexOf(DEFAULT_COLOR_NAME);
 if (isNaN(savedColorIndex) || !ALLOW_USER_CLOCK_COLOR_CHANGE) {
     savedColorIndex = defaultIndex;
-    localStorage.setItem("CLOCK_COLOR_INDEX", savedColorIndex);
+    localStorage.setItem("sc-color-index", savedColorIndex);
 }
 let currentColorIndex = savedColorIndex;
 
@@ -198,7 +222,7 @@ const PLUGIN_INFO = {
 };
 
 function applyClockStyles() {
-    const widget = $('#custom-clock-widget');
+    const widget = $('#sc-custom-clock-widget');
 
     let fontClass = FONT_STYLES[currentFontIndex];
     widget.removeClass(FONT_STYLES.join(" "));
@@ -207,13 +231,13 @@ function applyClockStyles() {
     let colorMode = COLOR_MODES[currentColorIndex];
     let finalColor = colorMode === "auto" ? "" : colorMode;
 
-    ['.clock-time', '.clock-date', '.clock-mode', '.clock-am-pm', '.synk-status'].forEach(selector => {
+    ['.sc-clock-time', '.sc-clock-date', '.sc-clock-mode', '.sc-clock-am-pm', '.sc-synk-status'].forEach(selector => {
         widget.find(selector).css("color", finalColor);
     });
 }
 
 function showZoomText(text) {
-    const clock = $('#custom-clock-widget');
+    const clock = $('#sc-custom-clock-widget');
     if (!clock.length) return;
 
     const offset = clock.offset();
@@ -246,7 +270,7 @@ function showZoomText(text) {
 
 function toggleFontStyle() {
     currentFontIndex = (currentFontIndex + 1) % FONT_STYLES.length;
-    localStorage.setItem("CLOCK_FONT_INDEX", currentFontIndex);
+    localStorage.setItem("sc-font-index", currentFontIndex);
     applyClockStyles();
 
     const fontName = FONT_STYLES[currentFontIndex].replace("font", "Font ") || "Standard";
@@ -256,7 +280,7 @@ function toggleFontStyle() {
 
 function toggleColorMode() {
     currentColorIndex = (currentColorIndex + 1) % COLOR_MODES.length;
-    localStorage.setItem("CLOCK_COLOR_INDEX", currentColorIndex);
+    localStorage.setItem("sc-color-index", currentColorIndex);
     applyClockStyles();
 
     const currentColor = COLOR_MODES[currentColorIndex];
@@ -269,23 +293,23 @@ function capitalize(text) {
 }
 
 function AdditionalDropdownClockFormat() {
-    if (!localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT")) {
-        localStorage.setItem("SIMPLE_CLOCK_CLOCK_FORMAT", DEFAULT_TIME_FORMAT);
+    if (!localStorage.getItem("sc-format")) {
+        localStorage.setItem("sc-format", DEFAULT_TIME_FORMAT);
     }
-    $("#clock-format-container").remove();
+    $("#sc-clock-format-container").remove();
     const panelFull = $('.panel-full.flex-center.no-bg.m-0').first();
 
     if (HIDE_TIME_FORMAT_DROPDOWN) return;
 
     if (panelFull.length) {
         panelFull.after(`
-            <div id="clock-format-container" class="form-group">
+            <div id="sc-clock-format-container" class="form-group">
                 <label for="clock-format" class="form-label">
                     <i class="fa-solid m-right-10"></i>Simple Clock Format
                 </label>
                 <div class="dropdown">
-                    <input type="text" id="clock-format-input" class="form-control" placeholder="Select format" readonly />
-                    <div id="clock-format-options" class="options">
+                    <input type="text" id="sc-clock-format-input" class="form-control" placeholder="Select format" readonly />
+                    <div id="sc-clock-format-options" class="options">
                         ${Object.keys(TIME_FORMATS).map(format => `<div class="option" data-value="${format}">${format}</div>`).join('')}
                     </div>
                 </div>
@@ -294,7 +318,7 @@ function AdditionalDropdownClockFormat() {
 
         const style = document.createElement('style');
         style.innerHTML = `
-            #clock-format-container label {
+            #sc-clock-format-container label {
                 display: block;
                 text-align: center;
                 width: 100%;
@@ -303,22 +327,22 @@ function AdditionalDropdownClockFormat() {
         document.head.appendChild(style);
     }
 
-    let savedFormat = localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT");
+    let savedFormat = localStorage.getItem("sc-format");
 
-    $("#clock-format-input").val(savedFormat);
+    $("#sc-clock-format-input").val(savedFormat);
 
-    $("#clock-format-input").click(function() {
-        $("#clock-format-options").toggleClass("opened");
+    $("#sc-clock-format-input").click(function() {
+        $("#sc-clock-format-options").toggleClass("opened");
     });
 
-    $("#clock-format-options .option").click(function() {
+    $("#sc-clock-format-options .option").click(function() {
         let selectedFormat = $(this).data("value");
 
-        localStorage.setItem("SIMPLE_CLOCK_CLOCK_FORMAT", selectedFormat);
-        $("#clock-format-input").val(selectedFormat);
+        localStorage.setItem("sc-format", selectedFormat);
+        $("#sc-clock-format-input").val(selectedFormat);
         updateClock();
 
-        $("#clock-format-options").removeClass("opened");
+        $("#sc-clock-format-options").removeClass("opened");
     });
 }
 
@@ -345,11 +369,11 @@ function addHideClockCheckbox() {
 
     imperialUnitsCheckbox.closest('.form-group').insertAdjacentElement("afterend", wrapper);
 
-    const saved = localStorage.getItem("SIMPLE_CLOCK_HIDE_CLOCK") === "true";
+    const saved = localStorage.getItem("sc-hide") === "true";
     document.getElementById(id).checked = saved;
 
     document.getElementById(id).addEventListener("change", function () {
-        localStorage.setItem("SIMPLE_CLOCK_HIDE_CLOCK", this.checked);
+        localStorage.setItem("sc-hide", this.checked);
         toggleClockVisibility();
     });
 
@@ -357,16 +381,16 @@ function addHideClockCheckbox() {
 }
 
 function toggleClockVisibility() {
-    let isHidden = localStorage.getItem("SIMPLE_CLOCK_HIDE_CLOCK") === "true";
+    let isHidden = localStorage.getItem("sc-hide") === "true";
     let isMobile = $(window).width() <= 768;
     let shouldHideClock = isHidden || (HIDE_CLOCK_ON_MOBILE && isMobile);
-    $("#custom-clock-widget").toggle(!shouldHideClock);
+    $("#sc-custom-clock-widget").toggle(!shouldHideClock);
     if (HIDE_CLOCK_ON_MOBILE && isMobile) {
-        $("#clock-format-container").hide();
-        $(".form-group.checkbox:has(#hide-clock)").hide();
+        $("#sc-clock-format-container").hide();
+        $(".form-group.checkbox:has(#sc-hide-clock)").hide();
     } else {
-        $("#clock-format-container").toggle(!isHidden);
-        $(".form-group.checkbox:has(#hide-clock)").show();
+        $("#sc-clock-format-container").toggle(!isHidden);
+        $(".form-group.checkbox:has(#sc-hide-clock)").show();
     }
 }
 
@@ -377,9 +401,9 @@ function updateFontSize() {
     let widthPerZoom = SHOW_SECONDS ? 8 : 6;
     let widgetWidth = baseWidth + SIMPLE_CLOCK_FONT_SIZE_SCALE * widthPerZoom;
 
-    $('#custom-clock-widget .clock-time').css("font-size", timeFontSize + "px");
-    $('#custom-clock-widget .clock-date').css("font-size", dateFontSize + "px");
-    $('#custom-clock-widget').css("width", widgetWidth + "px");
+    $('#sc-custom-clock-widget .sc-clock-time').css("font-size", timeFontSize + "px");
+    $('#sc-custom-clock-widget .sc-clock-date').css("font-size", dateFontSize + "px");
+    $('#sc-custom-clock-widget').css("width", widgetWidth + "px");
 
     let isMobile = window.innerWidth <= 768;
     let mobileAdjustment = isMobile ? -2 : 0;
@@ -387,8 +411,8 @@ function updateFontSize() {
     let baseTopOffset = (SIMPLE_CLOCK_FONT_SIZE_SCALE * 1.2) - 2;
     let topOffset = Math.max(-baseTopOffset, -14) + mobileAdjustment;
 
-    ['.clock-mode', '.clock-am-pm', '.synk-status'].forEach(selector => {
-        let el = $('#custom-clock-widget ' + selector)[0];
+    ['.sc-clock-mode', '.sc-clock-am-pm', '.sc-synk-status'].forEach(selector => {
+        let el = $('#sc-custom-clock-widget ' + selector)[0];
         if (el) {
             el.style.setProperty('top', topOffset + 'px', 'important');
         }
@@ -397,9 +421,9 @@ function updateFontSize() {
 
 function updateClock() {
     let now = new Date(serverTime.getTime() + (Date.now() - lastSync));
-    let selectedFormat = localStorage.getItem("SIMPLE_CLOCK_CLOCK_FORMAT") || Object.keys(TIME_FORMATS)[0];
+    let selectedFormat = localStorage.getItem("sc-format") || Object.keys(TIME_FORMATS)[0];
     let format = TIME_FORMATS[selectedFormat];
-    let clockWidget = $('#custom-clock-widget');
+    let clockWidget = $('#sc-custom-clock-widget');
     let is12HourFormat = format.time.includes('a');
     let fullTime = new Intl.DateTimeFormat('en-US', {
         hour: '2-digit',
@@ -419,7 +443,7 @@ function updateClock() {
         }).format(now);
         amPmText = "";
     }
-    let amPmElement = clockWidget.find('.clock-am-pm');
+    let amPmElement = clockWidget.find('.sc-clock-am-pm');
     if (is12HourFormat) {
         amPmElement.text(amPmText).show();
     } else {
@@ -457,40 +481,40 @@ function updateClock() {
     let timeMode = SIMPLE_CLOCK_USE_UTC ? "UTC" : "";
     let SyncStatusValue = (SERVER_SYNC === 'client') ? '⚠️' : '';
 
-    let syncStatusElement = clockWidget.find('.synk-status');
+    let syncStatusElement = clockWidget.find('.sc-synk-status');
     syncStatusElement.html(SyncStatusValue).show();
 	
 if (!clockWidget.length) {
     let panelContainer = $(".dashboard-panel .panel-100-real .dashboard-panel-plugin-content");
 
 let widgetHtml = `
-    <div id='custom-clock-widget' class='flex-container flex-center hide-phone hover-brighten br-15'
+    <div id='sc-custom-clock-widget' class='flex-container flex-center hide-phone hover-brighten br-15'
         style='position: relative; height: 50px; width: 125px; padding: 0px; text-align: center; display: flex; flex-direction: column; gap: 2px !important; user-select: none;'
         data-tooltip-disabled='true'>
 
         <!-- Mode -->
-        ${HIDE_TIME_MODE ? '' : `<span class='color-4 m-0 clock-mode'
+        ${HIDE_TIME_MODE ? '' : `<span class='color-4 m-0 sc-clock-mode'
             style='position: absolute; top: -10px; left: 78%; transform: translateX(-50%); font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 5px;'>
             ${timeMode}
         </span>`}
 
-        <span class='color-4 m-0 synk-status'
+        <span class='color-4 m-0 sc-synk-status'
             style='position: absolute; top: 4px; left: 96%; transform: translateX(-50%); font-size: 6px; font-weight: bold; padding: 2px 6px; border-radius: 5px;'>
             ${SyncStatusValue}
         </span>
-        <span class='color-4 m-0 clock-am-pm'
+        <span class='color-4 m-0 sc-clock-am-pm'
             style='position: absolute; top: -5px; left: 14%; transform: translateX(-50%); font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 5px; display: none;'>
         </span>
         
         <!-- Clock content -->
-        <span class='color-4 m-0 clock-time' style='font-size: 22px; font-weight: bold; line-height: 1;'>${time}</span>
-        <span class='color-4 m-0 clock-date' style='font-size: 12px; line-height: 0.7;'>${dateString}</span>
+        <span class='color-4 m-0 sc-clock-time' style='font-size: 22px; font-weight: bold; line-height: 1;'>${time}</span>
+        <span class='color-4 m-0 sc-clock-date' style='font-size: 12px; line-height: 0.7;'>${dateString}</span>
 
 ${(ALLOW_USER_CLOCK_FONT_CHANGE || ALLOW_USER_CLOCK_COLOR_CHANGE) ? `
-    <div class='clock-controls'
+    <div class='sc-clock-controls'
         style='display: none; position: absolute; bottom: -13px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: row; align-items: center; gap: 8px; z-index: 20;'>
-        ${ALLOW_USER_CLOCK_FONT_CHANGE ? `<span class='font-toggle' style='cursor: pointer;'>🅰️</span>` : ''}
-        ${ALLOW_USER_CLOCK_COLOR_CHANGE ? `<span class='color-toggle' style='cursor: pointer;'>🎨</span>` : ''}
+        ${ALLOW_USER_CLOCK_FONT_CHANGE ? `<span class='sc-font-toggle' style='cursor: pointer;'>🅰️</span>` : ''}
+        ${ALLOW_USER_CLOCK_COLOR_CHANGE ? `<span class='sc-color-toggle' style='cursor: pointer;'>🎨</span>` : ''}
     </div>
 ` : ''}
     </div>`;
@@ -501,15 +525,15 @@ if (PLUGIN_POSITION === "before") {
     panelContainer.after(widgetHtml);
 }
 
-$('.clock-controls').hide();
+$('.sc-clock-controls').hide();
 } else {
     if (dateString) {
-        clockWidget.find('.clock-date').text(dateString);
+        clockWidget.find('.sc-clock-date').text(dateString);
     } else {
-        clockWidget.find('.clock-date').text("");
+        clockWidget.find('.sc-clock-date').text("");
     }
-    clockWidget.find('.clock-time').text(time);
-    clockWidget.find('.clock-mode').text(timeMode);
+    clockWidget.find('.sc-clock-time').text(time);
+    clockWidget.find('.sc-clock-mode').text(timeMode);
     let tooltipText = DynTekst_show;
     if (TOOLTIP_MODE === "normal") {
         tooltipText += "\n" + DynTekst_show2;
@@ -520,7 +544,7 @@ $('.clock-controls').hide();
 
 
 
-    $('#custom-clock-widget').css("width", (SIMPLE_CLOCK_FONT_SIZE_SCALE * 10 + 10) + "px");
+    $('#sc-custom-clock-widget').css("width", (SIMPLE_CLOCK_FONT_SIZE_SCALE * 10 + 10) + "px");
     if (HIDE_CLOCK_ON_MOBILE && $(window).width() <= 768) {
         clockWidget.hide();
     } else {
@@ -531,14 +555,14 @@ $('.clock-controls').hide();
         .prop("type", "text/css")
         .html(`
             @media (max-width: 768px) {
-                #custom-clock-widget {
+                #sc-custom-clock-widget {
                     position: absolute;
                     left: 50%;
                     transform: translateX(-50%);
                     gap: 0px !important;
                     flex-direction: column;
                 }
-                    .clock-time, .clock-date {
+                    .sc-clock-time, .sc-clock-date {
                     line-height: 0.7 !important;
                     margin: 2px 0 !important;
                     padding: 0 !important;
@@ -551,7 +575,7 @@ $('.clock-controls').hide();
         .prop("type", "text/css")
         .html(`
             @media (max-width: 768px) {
-                #custom-clock-widget {
+                #sc-custom-clock-widget {
                     display: none !important;
                 }
             }
@@ -618,9 +642,9 @@ function updateTooltip() {
         tooltipText += "\n" + DynTekst_show2;
     }
 
-    $('#custom-clock-widget').attr('data-tooltip-content', tooltipText);
+    $('#sc-custom-clock-widget').attr('data-tooltip-content', tooltipText);
 
-    const tooltip = $('#clock-tooltip');
+    const tooltip = $('#sc-clock-tooltip');
     if (tooltip.is(':visible')) {
         tooltip.text(tooltipText);
     }
@@ -653,7 +677,7 @@ function updateDynText() {
 function toggleTimeFormat() {
     if (DISPLAY_MODE !== "auto") return;
     SIMPLE_CLOCK_USE_UTC = !SIMPLE_CLOCK_USE_UTC;
-    localStorage.setItem("SIMPLE_CLOCK_USE_UTC", SIMPLE_CLOCK_USE_UTC.toString());
+    localStorage.setItem("sc-use-utc", SIMPLE_CLOCK_USE_UTC.toString());
     console.log(`Toggled time format: Now using ${SIMPLE_CLOCK_USE_UTC ? "UTC" : "Local"} time`);
     updateClock();
 	updateDynText();
@@ -690,10 +714,10 @@ $(document).ready(() => {
         .appendTo("head");
 		
 	if (ALLOW_USER_CLOCK_FONT_CHANGE) {
-    $(document).on("click", ".font-toggle", toggleFontStyle);
+    $(document).on("click", ".sc-font-toggle", toggleFontStyle);
 }
 if (ALLOW_USER_CLOCK_COLOR_CHANGE) {
-    $(document).on("click", ".color-toggle", toggleColorMode);
+    $(document).on("click", ".sc-color-toggle", toggleColorMode);
 }
 	
     serverTime = new Date();
@@ -704,8 +728,8 @@ if (ALLOW_USER_CLOCK_COLOR_CHANGE) {
     updateDynText2();
     setInterval(updateClock, 1000);
     setInterval(fetchServerTime, 5 * 60 * 1000);
-    $(document).on('click', '#custom-clock-widget', function (e) {
-    if ($(e.target).closest('.font-toggle, .color-toggle').length === 0) {
+    $(document).on('click', '#sc-custom-clock-widget', function (e) {
+    if ($(e.target).closest('.sc-font-toggle, .sc-color-toggle').length === 0) {
         toggleTimeFormat();
     }
 });
@@ -715,7 +739,7 @@ if (ALLOW_USER_CLOCK_COLOR_CHANGE) {
     toggleClockVisibility();
 
     $('body').append(`
-        <div id="clock-tooltip" style="
+        <div id="sc-clock-tooltip" style="
             position: fixed;
             z-index: 15;
             text-align: center;
@@ -733,39 +757,39 @@ if (ALLOW_USER_CLOCK_COLOR_CHANGE) {
         "></div>
     `);
 	
-	$(document).on("mouseenter", "#custom-clock-widget", function () {
-		$('.clock-controls').fadeIn(150);
+	$(document).on("mouseenter", "#sc-custom-clock-widget", function () {
+		$('.sc-clock-controls').fadeIn(150);
 	});
-	$(document).on("mouseleave", "#custom-clock-widget", function () {
-		$('.clock-controls').fadeOut(150);
+	$(document).on("mouseleave", "#sc-custom-clock-widget", function () {
+		$('.sc-clock-controls').fadeOut(150);
 	});
 
 
-    $(document).on("mouseenter", "#custom-clock-widget", function () {
-        const tooltipText = $('#custom-clock-widget').attr('data-tooltip-content');
-        const widgetOffset = $('#custom-clock-widget').offset();
-        const widgetHeight = $('#custom-clock-widget').outerHeight();
+    $(document).on("mouseenter", "#sc-custom-clock-widget", function () {
+        const tooltipText = $('#sc-custom-clock-widget').attr('data-tooltip-content');
+        const widgetOffset = $('#sc-custom-clock-widget').offset();
+        const widgetHeight = $('#sc-custom-clock-widget').outerHeight();
 
-        $('#clock-tooltip').text(tooltipText).css({
+        $('#sc-clock-tooltip').text(tooltipText).css({
             display: 'block',
-            left: widgetOffset.left + ($('#custom-clock-widget').outerWidth() / 2) + "px",
+            left: widgetOffset.left + ($('#sc-custom-clock-widget').outerWidth() / 2) + "px",
             top: widgetOffset.top + widgetHeight + 10 + "px",
             transform: "translateX(-50%)"
         });
     });
 
-    $(document).on("mouseleave", "#custom-clock-widget", function () {
-        $('#clock-tooltip').hide();
+    $(document).on("mouseleave", "#sc-custom-clock-widget", function () {
+        $('#sc-clock-tooltip').hide();
     });
 
 if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
-    $('#custom-clock-widget').on('wheel', function(event) {
+    $('#sc-custom-clock-widget').on('wheel', function(event) {
         event.preventDefault();
 
         if (event.originalEvent.deltaY > 0) {
             if (SIMPLE_CLOCK_FONT_SIZE_SCALE > 0) {
                 SIMPLE_CLOCK_FONT_SIZE_SCALE--;
-                localStorage.setItem("SIMPLE_CLOCK_FONT_SIZE_SCALE", SIMPLE_CLOCK_FONT_SIZE_SCALE);
+                localStorage.setItem("sc-font-size", SIMPLE_CLOCK_FONT_SIZE_SCALE);
                 updateFontSize();
                 navigator.vibrate?.(30);
             } else {
@@ -775,7 +799,7 @@ if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
         } else {
             if (SIMPLE_CLOCK_FONT_SIZE_SCALE < MAX_CLOCK_ZOOM_LEVEL) {
                 SIMPLE_CLOCK_FONT_SIZE_SCALE++;
-                localStorage.setItem("SIMPLE_CLOCK_FONT_SIZE_SCALE", SIMPLE_CLOCK_FONT_SIZE_SCALE);
+                localStorage.setItem("sc-font-size", SIMPLE_CLOCK_FONT_SIZE_SCALE);
                 updateFontSize();
                 navigator.vibrate?.(30);
             } else {
@@ -787,11 +811,11 @@ if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
 
     let touchStartX = null;
 
-    $('#custom-clock-widget').on('touchstart', function(e) {
+    $('#sc-custom-clock-widget').on('touchstart', function(e) {
         touchStartX = e.originalEvent.touches[0].clientX;
     });
 
-    $('#custom-clock-widget').on('touchmove', function(e) {
+    $('#sc-custom-clock-widget').on('touchmove', function(e) {
         if (touchStartX === null) return;
 
         let touchEndX = e.originalEvent.touches[0].clientX;
@@ -816,13 +840,13 @@ if (ALLOW_USER_CLOCK_SIZE_CHANGE) {
                 }
             }
 
-            localStorage.setItem("SIMPLE_CLOCK_FONT_SIZE_SCALE", SIMPLE_CLOCK_FONT_SIZE_SCALE);
+            localStorage.setItem("sc-font-size", SIMPLE_CLOCK_FONT_SIZE_SCALE);
             updateFontSize();
             touchStartX = null;
         }
     });
 
-    $('#custom-clock-widget').on('touchend', function() {
+    $('#sc-custom-clock-widget').on('touchend', function() {
         touchStartX = null;
     });
 }
