@@ -57,7 +57,7 @@ This plugin is open-source and free to use. Feel free to contribute or modify it
 <br><br><br><br><br><br><br>
 
 📌 Version: 1.20.0: (Current)<br>
- - Added ned settings panel.
+ - Added a new settings panel.
  - 2 new clock modes: Flap clock and Nixie tube clock.
  - It detects server time and time zone automatically now.
 
