@@ -1,7 +1,7 @@
 // Plugin configuration, this is used in the administration when plugins are loaded
 var pluginConfig = {
     name: 'Simple Clock Plugin',
-    version: '1.10.1',
+    version: '1.20.1',
     author: 'ODX',
     frontEndPath: 'Simple_Clock/Simple_clock_plugin.js'
 }
