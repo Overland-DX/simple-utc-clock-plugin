@@ -28,9 +28,7 @@ Download or clone the repository.
 2. Navigate to \plugin\Simple_Clock\ and open Simple_clock_plugin.js with your favorite text editor. Change the values at the top of the code according to your wishes and save the changes.
 3. Restart your server and activate the plugin in Admin Panel.
 4. Restart the server to load the server part of the plugin.
-<br><br>Note!<br>
-If you are unsure which time zone to use, you can find some tips/info here: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-<br>
+
 <br><br><br>
 
 Usage:
