@@ -56,7 +56,13 @@ Notes
 This plugin is open-source and free to use. Feel free to contribute or modify it as needed. If you encounter issues, please open a ticket in the GitHub repository.
 <br><br><br><br><br><br><br>
 
-📌 Version: 1.10.0: (Current)<br>
+📌 Version: 1.20.0: (Current)<br>
+ - Added ned settings panel.
+ - 2 new clock modes: Flap clock and Nixie tube clock.
+ - It detects server time and time zone automatically now.
+
+<br><br>
+Version: 1.10.0:<br>
  - Added fonts and colors. (4 fonts and 15 colors)
  - Added ability to resize clock in mobile view. (Swipe left or right to change clock size)
  - Increased to 8 clock sizes. (can be changed in settings)
