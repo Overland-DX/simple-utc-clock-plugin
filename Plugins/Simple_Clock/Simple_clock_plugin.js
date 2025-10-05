@@ -1,6 +1,6 @@
 (() => {
     /*
-    Simple Clock v1.20.0
+    Simple Clock v1.20.1
     For FM-DX-Webserver v1.3.5 or later.
     */
 
@@ -9,13 +9,13 @@
 	// ===================================================================
 	const CONFIG = {
 		// General
-		PLUGIN_VERSION: "1.20.0",
+		PLUGIN_VERSION: "1.20.1",
 		GITHUB_URL: "https://github.com/Overland-DX/simple-utc-clock-plugin",
 
 		// Behavior
-		DEFAULT_CLOCK_MODE: "Digital Clock", // Sets the clock type shown to new users. Options: "Digital Clock", "Flap Clock", "Nixie Tube Clock"
+		DEFAULT_CLOCK_MODE: "Nixie Tube Clock", // Sets the clock type shown to new users. Options: "Digital Clock", "Flap Clock", "Nixie Tube Clock"
 		DISPLAY_MODE: "auto",                // "auto": User can click to toggle UTC/Local. "local": Locks to server time. "utc": Locks to UTC time.
-		TOOLTIP_MODE: "limited",              // "normal": Shows all info on hover. "limited": Shows only the current time mode.
+		TOOLTIP_MODE: "normal",              // "normal": Shows all info on hover. "limited": Shows only the current time mode.
 		PLUGIN_POSITION: "after",            // "after": Places the clock to the right of other plugins. "before": Places it to the left.
 		HIDE_SETTINGS_BUTTON: false,         // true: Hides the gear icon for all users. false: Shows the gear icon.
 		HIDE_CLOCK_ON_MOBILE: false,         // true: Hides the clock entirely on small screens (phones). false: Shows the clock on all devices.
@@ -31,21 +31,24 @@
 		// ===================================================================
 		CLOCK_DEFAULTS: {
 			digital: {
-				zoom: 3,                     // Default zoom level. Range: 1 to 8.
-				showSeconds: true,           // true: Shows seconds. false: Hides seconds.
-				colorName: "Theme Color",    // Default color. Options: "Theme Color", "Sky Blue", "Red", "Sunflower", "Emerald", etc. (see PRESETS.COLORS).
-				fontIndex: 0,                // Default font. 0 = Standard, 1 = Font 1, 2 = Font 2, etc. (see PRESETS.FONTS).
-				timeFormat: "24h dd MMM yyyy"// Default date/time format. Options: "24h dd.MM.yyyy", "12h MM.dd.yyyy", "24h Time Only", etc. (see PRESETS.TIME_FORMATS).
+				zoom: 3,
+				showSeconds: true,
+				colorName: "Theme Color",
+				fontIndex: 0,
+				timeFormat: "24h dd MMM yyyy"
 			},
 			flap: {
-				zoom: 2,                     // Default zoom level. Range: 1 to 5.
-				showSeconds: false,          // true: Shows seconds. false: Hides seconds.
-				colorName: "Theme Color"     // Default color. Options: "Theme Color", "Sky Blue", "Red", "Sunflower", "Emerald", etc.
+				zoom: 2,
+				showSeconds: false,
+				showDate: true,
+				dateFormat: "dd.MM.yyyy",
+				colorName: "Theme Color"
 			},
 			nixie: {
-				zoom: 2,                     // Default zoom level. Range: 1 to 5.
-				showSeconds: false,          // true: Shows seconds. false: Hides seconds.
-				showDate: false              // true: Shows date on zoom levels -1 and 0. false: Always hides date.
+				zoom: 2,
+				showSeconds: false,
+				showDate: true,
+				dateFormat: "dd.MM.yyyy"
 			}
 		}
 	};
@@ -56,7 +59,26 @@
     const PRESETS = {
         FONTS: ["standard", "sc-font1", "sc-font2", "sc-font3", "sc-font4"],
         COLORS: { "Theme Color": "auto", "Turquoise": "#1abc9c", "Sky Blue": "#3498db", "Amethyst": "#9b59b6", "Red": "#e74c3c", "Sunflower": "#f1c40f", "Emerald": "#2ecc71", "Orange": "#e67e22", "Light Gray": "#ecf0f1", "Dark Slate": "#34495e", "Pink": "#fd79a8", "Cyan": "#00cec9", "Deep Pink": "#e84393", "Pumpkin": "#d35400", "Concrete": "#7f8c8d", "Mint Green": "#26de81", "Lavender": "#a29bfe", "Coral Pink": "#ff7979", "Steel Gray": "#535c68", "Ocean Blue": "#01a3a4" },
-        TIME_FORMATS: { "24h dd.MM.yyyy": {}, "24h dd MMM yyyy": {}, "12h dd.MM.yyyy": {}, "24h MM.dd.yyyy": {}, "24h MMM dd yyyy": {}, "12h MM.dd.yyyy": {}, "24h yyyy.MM.dd": {}, "24h yyyy MMM dd": {}, "12h yyyy.MM.dd": {}, "24h Time Only": { time: "HH:mm:ss" } }
+        TIME_FORMATS: { "24h dd.MM.yyyy": {}, "24h dd MMM yyyy": {}, "12h dd.MM.yyyy": {}, "24h MM.dd.yyyy": {}, "24h MMM dd yyyy": {}, "12h MM.dd.yyyy": {}, "24h yyyy.MM.dd": {}, "24h yyyy MMM dd": {}, "12h yyyy.MM.dd": {}, "24h Time Only": { time: "HH:mm:ss" } },
+        DATE_FORMATS: {
+			// Standard formats
+			"dd.MM.yyyy": {},
+			"dd MMM yyyy": {},
+			"MM.dd.yyyy": {},
+			"MMM dd yyyy": {},
+			"yyyy.MM.dd": {},
+			"yyyy MMM dd": {},
+			// Formats with short day name
+			"DDD, dd.MM.yyyy": {},
+			"DDD, dd MMM yyyy": {},
+			"DDD, MM.dd.yyyy": {},
+			"DDD, MMM dd yyyy": {},
+			// Formats with long day name
+			"DDDD, dd.MM.yyyy": {},
+			"DDDD, dd MMM yyyy": {},
+			"DDDD, MM.dd.yyyy": {},
+			"DDDD, MMM dd yyyy": {}
+		},
     };
 
     /**
@@ -374,6 +396,31 @@
             }).appendTo('body').animate({ opacity: 1 }, 150).delay(800).fadeOut(300, function() { $(this).remove(); });
         }
         
+        _formatDate(now, format, useUTC) {
+            const dateOptions = {
+                day: '2-digit',
+                month: format.includes('MMM') ? 'short' : '2-digit',
+                year: 'numeric',
+                timeZone: useUTC ? "UTC" : this.settings.get('serverTimezone', 'UTC')
+            };
+
+            if (format.includes('DDD')) {
+                dateOptions.weekday = format.includes('DDDD') ? 'long' : 'short';
+            }
+
+            const p = new Intl.DateTimeFormat('en-US', dateOptions).formatToParts(now).reduce((acc, part) => ({...acc, [part.type]: part.value }), {});
+
+            let dateString = format;
+            dateString = dateString.replace('DDDD', p.weekday); 
+            dateString = dateString.replace('DDD', p.weekday); 
+            dateString = dateString.replace('dd', p.day);
+            dateString = dateString.replace('MMM', p.month);
+            dateString = dateString.replace('MM', p.month); 
+            dateString = dateString.replace('yyyy', p.year);
+
+            return dateString;
+        }
+
         applyStyles() { /* Implemented by subclasses */ }
         update(now, useUTC, syncStatus) { /* Implemented by subclasses */ }
         updateSize() { /* Implemented by subclasses */ }
@@ -391,30 +438,36 @@
             return `<div><label for="sc-modal-font-select">Font</label><select id="sc-modal-font-select">${PRESETS.FONTS.map((f, i) => `<option value="${i}" ${currentFont === i ? 'selected' : ''}>${f === 'standard' ? 'Standard' : `Font ${i+1}`}</option>`).join('')}</select></div>`;
         }
 
-   _getShowSecondsHTML(settingKey, labelText = "Show Seconds") {
-    const isChecked = this.settings.get(settingKey, false);
-    const checkboxId = `sc-${settingKey}-checkbox`;
-    return `
-        <div class="sc-checkbox-container">
-            <label>${labelText}</label>
-            <label class="sc-switch">
-                <input type="checkbox" id="${checkboxId}" ${isChecked ? 'checked' : ''}>
-                <span class="sc-slider"></span>
-            </label>
-        </div>
-    `;
+        _getDateFormatSettingsHTML(settingKey) {
+            const currentFormat = this.settings.get(settingKey, 'dd.MM.yyyy');
+            const formatOptions = Object.keys(PRESETS.DATE_FORMATS).map(f => `<option value="${f}" ${currentFormat === f ? 'selected' : ''}>${f}</option>`).join('');
+            return `<div><label for="sc-modal-date-format-select">Date Format</label><select id="sc-modal-date-format-select">${formatOptions}</select></div>`;
+        }
+
+        _getShowSecondsHTML(settingKey, labelText = "Show Seconds") {
+            const isChecked = this.settings.get(settingKey, false);
+            const checkboxId = `sc-${settingKey}-checkbox`;
+            return `
+                <div class="sc-checkbox-container">
+                    <label>${labelText}</label>
+                    <label class="sc-switch">
+                        <input type="checkbox" id="${checkboxId}" ${isChecked ? 'checked' : ''}>
+                        <span class="sc-slider"></span>
+                    </label>
+                </div>
+            `;
         }
         
-_getZoomSliderHTML(settingKey) {
-    const currentZoom = this.settings.get(settingKey, 0); 
-    return `<div>
-                <label for="sc-zoom-slider">Zoom <span>(${currentZoom})</span></label>
-                <input type="range" id="sc-zoom-slider" class="sc-range-slider"
-                       min="${this.config.minZoom}"
-                       max="${this.config.maxZoom}"
-                       value="${currentZoom}">
-            </div>`;
-}
+        _getZoomSliderHTML(settingKey) {
+            const currentZoom = this.settings.get(settingKey, 0); 
+            return `<div>
+                        <label for="sc-zoom-slider">Zoom <span>(${currentZoom})</span></label>
+                        <input type="range" id="sc-zoom-slider" class="sc-range-slider"
+                               min="${this.config.minZoom}"
+                               max="${this.config.maxZoom}"
+                               value="${currentZoom}">
+                    </div>`;
+        }
     }
 
     class DigitalClock extends BaseClock {
@@ -472,15 +525,8 @@ _getZoomSliderHTML(settingKey) {
 
             let dateString = '';
             if (!timeFormat.includes("Time Only")) {
-                const dateOptions = { day: '2-digit', month: timeFormat.includes('MMM') ? 'short' : '2-digit', year: 'numeric', timeZone: useUTC ? "UTC" : this.settings.get('serverTimezone', 'UTC') };
-                let p = new Intl.DateTimeFormat('en-US', dateOptions).formatToParts(now).reduce((acc, part) => ({...acc, [part.type]: part.value }), {});
-                
-                if (timeFormat.includes("dd.MM.yyyy")) dateString = `${p.day}.${p.month}.${p.year}`;
-                else if (timeFormat.includes("dd MMM yyyy")) dateString = `${p.day} ${p.month} ${p.year}`;
-                else if (timeFormat.includes("MM.dd.yyyy")) dateString = `${p.month}.${p.day}.${p.year}`;
-                else if (timeFormat.includes("MMM dd yyyy")) dateString = `${p.month} ${p.day} ${p.year}`;
-                else if (timeFormat.includes("yyyy.MM.dd")) dateString = `${p.year}.${p.month}.${p.day}`;
-                else if (timeFormat.includes("yyyy MMM dd")) dateString = `${p.year} ${p.month} ${p.day}`;
+                const dateFormat = timeFormat.replace(/^(24h|12h)\s/, '');
+                dateString = this._formatDate(now, dateFormat, useUTC);
             }
 
             $(this.element).find('.sc-clock-time').text(timeString);
@@ -499,10 +545,16 @@ _getZoomSliderHTML(settingKey) {
             const baseWidth = 65; 
             const widthPerZoom = this.showSeconds ? 8 : 6;
             const widgetWidth = baseWidth + scale * widthPerZoom;
-            
+
+            const labelTopPosition = 0 - (scale * 1.5);
+            const syncTopPosition = labelTopPosition + 16;
+
             $(this.element).find('.sc-clock-time').css("font-size", `${timeFontSize}px`);
             $(this.element).find('.sc-clock-date').css("font-size", `${dateFontSize}px`);
             $(this.element).css("width", `${widgetWidth}px`);
+
+            $(this.element).find('.sc-clock-mode, .sc-clock-am-pm').css("top", `${labelTopPosition}px`);
+            $(this.element).find('.sc-synk-status').css("top", `${syncTopPosition}px`);
         }
 
         getSettingsHTML() {
@@ -556,6 +608,7 @@ _getZoomSliderHTML(settingKey) {
             this.id = 'sc-flap-clock-widget';
             this.config = { minZoom: 1, maxZoom: 5 };
             this.showSeconds = this.settings.get('flap-showSeconds', CONFIG.CLOCK_DEFAULTS.flap.showSeconds);
+            this.showDate = this.settings.get('flap-showDate', CONFIG.CLOCK_DEFAULTS.flap.showDate);
         }
 
         _getHTML() {
@@ -582,6 +635,7 @@ _getZoomSliderHTML(settingKey) {
                         <div class="sc-flap-digit-group">${digitsHTML.substring(digitsHTML.length/2)}</div>
                         ${secondsHTML}
                     </div>
+                    <span class="sc-flap-date"></span>
                     ${!CONFIG.HIDE_SETTINGS_BUTTON ? `<div class='sc-clock-controls'><span class='sc-settings-toggle'>⚙️</span></div>` : ''}
                 </div>`;
         }
@@ -602,15 +656,25 @@ _getZoomSliderHTML(settingKey) {
                 newTimeString += now.getSeconds().toString().padStart(2, '0');
             }
 
-            if (newTimeString === this.previousTimeString) return;
-            this.previousTimeString = newTimeString;
+            if (newTimeString !== this.previousTimeString) {
+                this.previousTimeString = newTimeString;
 
-            for (let i = 0; i < newTimeString.length; i++) {
-                const digitElement = $(this.element).find(`.sc-flap-digit:eq(${i})`);
-                if (digitElement.attr('data-value') !== newTimeString[i]) {
-                    this._flip(digitElement, newTimeString[i]);
+                for (let i = 0; i < newTimeString.length; i++) {
+                    const digitElement = $(this.element).find(`.sc-flap-digit:eq(${i})`);
+                    if (digitElement.attr('data-value') !== newTimeString[i]) {
+                        this._flip(digitElement, newTimeString[i]);
+                    }
                 }
             }
+            
+            if (this.showDate) {
+                const dateFormat = this.settings.get('flap-dateFormat', CONFIG.CLOCK_DEFAULTS.flap.dateFormat);
+                const dateString = this._formatDate(now, dateFormat, useUTC);
+                $(this.element).find('.sc-flap-date').text(dateString).show();
+            } else {
+                $(this.element).find('.sc-flap-date').hide();
+            }
+
             $(this.element).find('.sc-flap-clock-mode').text(useUTC ? "UTC" : "").toggle(!CONFIG.HIDE_TIME_MODE_LABEL);
         }
         
@@ -645,14 +709,25 @@ _getZoomSliderHTML(settingKey) {
             const digitWidth = 18 + scale * 4;
             const digitHeight = 30 + scale * 6;
             const fontSize = 24 + scale * 5;
-            $(this.element).find('.sc-flap-digit').css({ 'width': `${digitWidth}px`, 'height': `${digitHeight}px`, 'font-size': `${fontSize}px` });
+            const dateFontSize = 10 + scale * 1.5;
+
+            $(this.element).find('.sc-flap-digit').css({
+                'width': `${digitWidth}px`,
+                'height': `${digitHeight}px`,
+                'font-size': `${fontSize}px`
+            });
             $(this.element).find('.sc-flap-separator').css('font-size', `${fontSize}px`);
+            $(this.element).find('.sc-flap-date').css('font-size', `${dateFontSize}px`);
+
+            $(this.element).find('.sc-flap-digit span').css('line-height', `${digitHeight}px`);
         }
 
         getSettingsHTML() {
             return `
                 ${this._getThemeSettingsHTML('flap-colorName')}
+                ${this.showDate ? this._getDateFormatSettingsHTML('flap-dateFormat') : ''}
                 ${this._getShowSecondsHTML('flap-showSeconds')}
+                ${this._getShowSecondsHTML('flap-showDate', 'Show Date')}
                 <hr>
                 ${this._getZoomSliderHTML('flap-zoom')}
             `;
@@ -664,14 +739,27 @@ _getZoomSliderHTML(settingKey) {
             this.settings.set('flap-colorName', newColorName);
             this.applyStyles();
 
+            const newDateFormat = $('#sc-modal-date-format-select').val();
+            if (newDateFormat && this.settings.get('flap-dateFormat', '') !== newDateFormat) {
+                this.settings.set('flap-dateFormat', newDateFormat);
+                this.previousTimeString = '';
+            }
+
             const showSeconds = $('#sc-flap-showSeconds-checkbox').is(':checked');
             if (this.showSeconds !== showSeconds) {
                 this.showSeconds = showSeconds;
                 this.settings.set('flap-showSeconds', showSeconds);
-                
                 this.destroy();
                 this.init();
                 return;
+            }
+            
+            const showDate = $('#sc-flap-showDate-checkbox').is(':checked');
+            if (this.showDate !== showDate) {
+                this.showDate = showDate;
+                this.settings.set('flap-showDate', showDate);
+                this.previousTimeString = '';
+                this.modal.updateContent(this.getSettingsHTML());
             }
             
             const newZoom = parseInt($('#sc-zoom-slider').val(), 10);
@@ -745,13 +833,13 @@ _getZoomSliderHTML(settingKey) {
             }
             
             if (this.showDate) {
-                const day = (useUTC ? now.getUTCDate() : now.getDate()).toString().padStart(2, '0');
-                const month = (useUTC ? now.getUTCMonth() + 1 : now.getMonth() + 1).toString().padStart(2, '0');
-                const year = useUTC ? now.getUTCFullYear() : now.getFullYear();
-                $(this.element).find('.sc-nixie-date').text(`${day}.${month}.${year}`);
+                const dateFormat = this.settings.get('nixie-dateFormat', CONFIG.CLOCK_DEFAULTS.nixie.dateFormat);
+                const dateString = this._formatDate(now, dateFormat, useUTC);
+                $(this.element).find('.sc-nixie-date').text(dateString);
             }
 
             $(this.element).find('.sc-nixie-clock-mode').text(useUTC ? "UTC" : "").toggle(!CONFIG.HIDE_TIME_MODE_LABEL);
+			this._adjustContainerWidth();
         }
 
         updateSize() {
@@ -765,24 +853,51 @@ _getZoomSliderHTML(settingKey) {
             } else {
                 dateElement.hide();
             }
+			
+			this._adjustContainerWidth();
         }
         
-getSettingsHTML() {
-    return `
+		_adjustContainerWidth() {
+            setTimeout(() => {
+                const timeElement = $(this.element).find('.sc-nixie-time');
+                const dateElement = $(this.element).find('.sc-nixie-date');
 
-        ${this._getShowSecondsHTML('nixie-showSeconds')}
-        ${this._getShowSecondsHTML('nixie-showDate', 'Show Date (at zoom 1-2)')}
-        <hr>
-        ${this._getZoomSliderHTML('nixie-zoom')}
-    `;
-}
+                if (!timeElement.length) return; 
+
+                const timeWidth = timeElement.outerWidth();
+                let dateWidth = 0;
+
+                if (dateElement.is(':visible')) {
+                    dateWidth = dateElement.outerWidth();
+                }
+
+                const requiredWidth = Math.max(timeWidth, dateWidth);
+
+                $(this.element).css('width', `${requiredWidth}px`);
+            }, 0);
+        }
+
+        getSettingsHTML() {
+            return `
+                ${this.showDate ? this._getDateFormatSettingsHTML('nixie-dateFormat') : ''}
+                ${this._getShowSecondsHTML('nixie-showSeconds')}
+                ${this._getShowSecondsHTML('nixie-showDate', 'Show Date (at zoom 1-2)')}
+                <hr>
+                ${this._getZoomSliderHTML('nixie-zoom')}
+            `;
+        }
 
         applySettingsFromModal() {
+            const newDateFormat = $('#sc-modal-date-format-select').val();
+            if (newDateFormat && this.settings.get('nixie-dateFormat', '') !== newDateFormat) {
+                this.settings.set('nixie-dateFormat', newDateFormat);
+                this.previousTimeString = ''; 
+            }
+
             const showSeconds = $('#sc-nixie-showSeconds-checkbox').is(':checked');
             if (this.showSeconds !== showSeconds) {
                 this.showSeconds = showSeconds;
                 this.settings.set('nixie-showSeconds', showSeconds);
-                
                 this.destroy();
                 this.init();
                 return; 
@@ -792,7 +907,9 @@ getSettingsHTML() {
             if (this.showDate !== showDate) {
                 this.showDate = showDate;
                 this.settings.set('nixie-showDate', showDate);
-
+                this.previousTimeString = '';
+				this.updateSize();
+                this.modal.updateContent(this.getSettingsHTML());
             }
 
             const newZoom = parseInt($('#sc-zoom-slider').val(), 10);
@@ -1023,19 +1140,19 @@ getSettingsHTML() {
                 #sc-plugin-wrapper .sc-clock-controls { display: none; position: absolute; top: -15px; left: -10px; z-index: 20; }
                 #sc-plugin-wrapper .sc-settings-toggle { cursor: pointer; font-size: 1.2em; }
                 /* --- Digital Clock Specific Styles --- */
-                #sc-digital-clock-widget .sc-clock-mode, #sc-digital-clock-widget .sc-clock-am-pm, #sc-digital-clock-widget .sc-synk-status { position: absolute; top: -10px; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 5px; }
-                #sc-digital-clock-widget .sc-clock-mode { left: 78%; transform: translateX(-50%); }
-                #sc-digital-clock-widget .sc-synk-status { top: 4px; left: 96%; transform: translateX(-50%); font-size: 6px; }
-                #sc-digital-clock-widget .sc-clock-am-pm { left: 14%; transform: translateX(-50%); }
+                #sc-digital-clock-widget .sc-clock-mode, #sc-digital-clock-widget .sc-clock-am-pm, #sc-digital-clock-widget .sc-synk-status { position: absolute; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 5px; }
+                #sc-digital-clock-widget .sc-clock-mode { right: -5px; transform: none; }
+                #sc-digital-clock-widget .sc-synk-status { right: -12px; font-size: 6px; }
+                #sc-digital-clock-widget .sc-clock-am-pm { left: -5px; transform: none; }
                 #sc-digital-clock-widget .sc-clock-time { font-weight: bold; line-height: 1; }
                 #sc-digital-clock-widget .sc-clock-date { line-height: 0.7; white-space: nowrap; }
                 /* --- Font Styles --- */
                 @font-face { font-family: 'SCFont1'; src: url('/SC-FONTS/font1.ttf') format('truetype'); } @font-face { font-family: 'SCFont2'; src: url('/SC-FONTS/font2.ttf') format('truetype'); } @font-face { font-family: 'SCFont3'; src: url('/SC-FONTS/font3.ttf') format('truetype'); } @font-face { font-family: 'SCFont4'; src: url('/SC-FONTS/font4.ttf') format('truetype'); }
                 .sc-font1 { font-family: 'SCFont1'; } .sc-font2 { font-family: 'SCFont2', serif; } .sc-font3 { font-family: 'SCFont3', cursive; } .sc-font4 { font-family: 'SCFont4'; }
                 /* --- Flap Clock Styles --- */
-                #sc-flap-clock-widget { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; user-select: none; } .sc-flap-clock-mode { font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 5px; position: absolute; top: -10px; } .sc-flap-time { display: flex; gap: 4px; align-items: center; } .sc-flap-digit-group { display: flex; gap: 2px; } .sc-flap-digit { position: relative; perspective: 400px; box-shadow: 0 3px 10px rgba(0,0,0,0.3); border-radius: 4px; } .sc-flap-static, .sc-flap-flipper-face { position: absolute; left: 0; width: 100%; height: 50%; overflow: hidden; background-color: var(--color-2, #2A2A2A); border-radius: 4px; display: flex; justify-content: center; box-sizing: border-box; } .sc-flap-flipper-face { height: 100%; } .sc-flap-top, .sc-flap-flipper-front { top: 0; align-items: flex-start; box-shadow: inset 0 1px 0px rgba(255,255,255,0.1); border-bottom: 1px solid rgba(0,0,0,0.5); } .sc-flap-bottom, .sc-flap-flipper-back { bottom: 0; align-items: flex-end; box-shadow: inset 0 1px 1px rgba(0,0,0,0.4); } .sc-flap-top span, .sc-flap-flipper-front span { transform: translateY(-0.2em); } .sc-flap-bottom span, .sc-flap-flipper-back span { transform: translateY(0.1em); } .sc-flap-static { z-index: 1; } .sc-flap-flipper { position: absolute; top: 0; left: 0; width: 100%; height: 50%; transform-origin: bottom; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1); z-index: 10; } .sc-flipping .sc-flap-flipper { transform: rotateX(-180deg); } .sc-flap-flipper-face { position: absolute; backface-visibility: hidden; } .sc-flap-flipper-back { transform: rotateX(180deg); } .sc-flap-separator { font-weight: bold; padding: 0 2px; }
+                #sc-flap-clock-widget { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; user-select: none; } .sc-flap-clock-mode { font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 5px; position: absolute; top: -10px; } .sc-flap-time { display: flex; gap: 4px; align-items: center; } .sc-flap-digit-group { display: flex; gap: 2px; } .sc-flap-digit { position: relative; perspective: 400px; box-shadow: 0 3px 10px rgba(0,0,0,0.3); border-radius: 4px; } .sc-flap-static, .sc-flap-flipper-face { position: absolute; left: 0; width: 100%; height: 50%; overflow: hidden; background-color: var(--color-2, #2A2A2A); border-radius: 4px; display: flex; justify-content: center; box-sizing: border-box; } .sc-flap-flipper-face { height: 100%; } .sc-flap-top, .sc-flap-flipper-front { top: 0; align-items: flex-start; box-shadow: inset 0 1px 0px rgba(255,255,255,0.1); border-bottom: 1px solid rgba(0,0,0,0.5); } .sc-flap-bottom, .sc-flap-flipper-back { bottom: 0; align-items: flex-end; box-shadow: inset 0 1px 1px rgba(0,0,0,0.4); } .sc-flap-top span, .sc-flap-flipper-front span {} .sc-flap-bottom span, .sc-flap-flipper-back span {} .sc-flap-static { z-index: 1; } .sc-flap-flipper { position: absolute; top: 0; left: 0; width: 100%; height: 50%; transform-origin: bottom; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1); z-index: 10; } .sc-flipping .sc-flap-flipper { transform: rotateX(-180deg); } .sc-flap-flipper-face { position: absolute; backface-visibility: hidden; } .sc-flap-flipper-back { transform: rotateX(180deg); } .sc-flap-separator { font-weight: bold; padding: 0 2px; } .sc-flap-date { position: absolute; bottom: -13px; left: 50%; transform: translateX(-50%); width: 100%; text-align: center; white-space: nowrap; font-weight: bold; }
                 /* --- Nixie Tube Clock Styles --- */
-                #sc-nixie-clock-widget { font-family: 'Nixie One', cursive; font-weight: 400; position: relative; text-align: center; } 
+                #sc-nixie-clock-widget { font-family: 'Nixie One', cursive; font-weight: 400; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
                 .sc-nixie-time { display: flex; gap: 0.25em; align-items: center; justify-content: center; } 
                 .sc-nixie-digit-group { display: flex; gap: 0.3em; } 
                 .sc-nixie-separator { color: #ff8a00; text-shadow: 0 0 5px #ff8a00, 0 0 10px #ffc900; animation: sc-nixie-flicker 1.5s infinite alternate; margin-top: -0.2em; } 
@@ -1046,7 +1163,7 @@ getSettingsHTML() {
                 .sc-nixie-digit span.sc-nixie-active { color: #ff9f1a; opacity: 1; text-shadow: 0 0 2px #ff9f1a, 0 0 6px #ff9f1a, 0 0 12px #ff6a00, 0 0 20px #ff6a00, 0 0 30px #ff4d00; animation: sc-nixie-flicker-dyn 2s infinite; z-index: 10; } 
                 @keyframes sc-nixie-flicker { 0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 1; } 20%, 24%, 55% { opacity: 0.95; } }
                 .sc-nixie-clock-mode { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 10px; font-weight: bold; color: #ff9f1a; text-shadow: 0 0 1px #ff9f1a, 0 0 3px #ff9f1a, 0 0 6px #ff6a00; animation: sc-nixie-flicker-dyn 2s infinite; }
-                .sc-nixie-date { position: absolute; bottom: -13px; left: 50%; transform: translateX(-50%); width: 100%; font-size: 13px; color: #ff9f1a; text-shadow: 0 0 1px #ff9f1a, 0 0 3px #ff6a00; animation: sc-nixie-flicker-dyn 2.5s infinite; }
+                .sc-nixie-date { margin-top: 1px; margin-bottom: -10px; white-space: nowrap; font-size: 13px; color: #ff9f1a; text-shadow: 0 0 1px #ff9f1a, 0 0 3px #ff6a00; animation: sc-nixie-flicker-dyn 2.5s infinite; }
             `;
             $('<style>').prop('type', 'text/css').html(css).appendTo('head');
             $('head').append('<link href="https://fonts.googleapis.com/css2?family=Nixie+One&display=swap" rel="stylesheet">');
