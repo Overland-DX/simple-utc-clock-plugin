@@ -1,6 +1,6 @@
 (() => {
     /*
-    Simple Clock v1.20.1
+    Simple Clock v1.20.2
     For FM-DX-Webserver v1.3.5 or later.
     */
 
@@ -9,15 +9,19 @@
 	// ===================================================================
 	const CONFIG = {
 		// General
-		PLUGIN_VERSION: "1.20.1",
+		PLUGIN_VERSION: "1.20.2",
 		GITHUB_URL: "https://github.com/Overland-DX/simple-utc-clock-plugin",
 
 		// Behavior
-		DEFAULT_CLOCK_MODE: "Nixie Tube Clock", // Sets the clock type shown to new users. Options: "Digital Clock", "Flap Clock", "Nixie Tube Clock"
+		DEFAULT_CLOCK_MODE: "Digital Clock", // Sets the clock type shown to new users. Options: "Digital Clock", "Flap Clock", "Nixie Tube Clock"
 		DISPLAY_MODE: "auto",                // "auto": User can click to toggle UTC/Local. "local": Locks to server time. "utc": Locks to UTC time.
 		TOOLTIP_MODE: "normal",              // "normal": Shows all info on hover. "limited": Shows only the current time mode.
 		PLUGIN_POSITION: "after",            // "after": Places the clock to the right of other plugins. "before": Places it to the left.
+
 		HIDE_SETTINGS_BUTTON: false,         // true: Hides the gear icon for all users. false: Shows the gear icon.
+		SETTINGS_STORAGE_KEY: null,  	     // To force-reset all user settings, change this value to a new unique string (e.g., SETTINGS_STORAGE_KEY: "1",). 
+											 // This ensures all users get the new default settings on their next page load. Set to SETTINGS_STORAGE_KEY: null, to disable.
+
 		HIDE_CLOCK_ON_MOBILE: false,         // true: Hides the clock entirely on small screens (phones). false: Shows the clock on all devices.
 		HIDE_TIME_MODE_LABEL: false,         // true: Hides the small "UTC" text above the clock. false: Shows the text.
 
@@ -31,24 +35,24 @@
 		// ===================================================================
 		CLOCK_DEFAULTS: {
 			digital: {
-				zoom: 3,
-				showSeconds: true,
-				colorName: "Theme Color",
-				fontIndex: 0,
-				timeFormat: "24h dd MMM yyyy"
+				zoom: 4,                     // Default zoom level. Range: 1 to 8.
+				showSeconds: true,           // true: Shows seconds. false: Hides seconds.
+				colorName: "Theme Color",    // Default color. Options: "Theme Color", "Sky Blue", "Red", "Sunflower", "Emerald", etc. (see PRESETS.COLORS).
+				fontIndex: 0,                // Default font. 0 = Standard, 1 = Font 1, 2 = Font 2, etc. (see PRESETS.FONTS).
+				timeFormat: "24h dd MMM yyyy"// Default date/time format. Options: "24h dd.MM.yyyy", "12h MM.dd.yyyy", "24h Time Only", etc. (see PRESETS.TIME_FORMATS).
 			},
 			flap: {
-				zoom: 2,
-				showSeconds: false,
-				showDate: true,
-				dateFormat: "dd.MM.yyyy",
-				colorName: "Theme Color"
+				zoom: 3,                     // Default zoom level. Range: 1 to 5.
+				showSeconds: true,           // true: Shows seconds. false: Hides seconds.
+				showDate: true,				 // true: Shows date. false: Always hides date.
+				dateFormat: "DDDD, dd MMM yyyy",// Default date format. Options: "dd.MM.yyyy", "yyyy MMM dd", "DDDD, dd MMM yyyy", etc. (see PRESETS.DATE_FORMATS).
+				colorName: "Theme Color"     // Default color. Options: "Theme Color", "Sky Blue", "Red", "Sunflower", "Emerald", etc. (see PRESETS.COLORS).
 			},
 			nixie: {
-				zoom: 2,
-				showSeconds: false,
-				showDate: true,
-				dateFormat: "dd.MM.yyyy"
+				zoom: 2,                     // Default zoom level. Range: 1 to 5.
+				showSeconds: false,          // true: Shows seconds. false: Hides seconds.
+				showDate: true,              // true: Shows date on zoom levels 1 and 2. false: Always hides date.
+				dateFormat: "DDDD, dd MMM yyyy"// Default date format. Options: "dd.MM.yyyy", "yyyy MMM dd", "DDDD, dd MMM yyyy", etc. (see PRESETS.DATE_FORMATS).
 			}
 		}
 	};
@@ -91,21 +95,39 @@
         }
 
         _loadSettings() {
-            const storedSettings = localStorage.getItem(this.storageKey);
-            if (storedSettings) {
-                try {
-                    return JSON.parse(storedSettings);
-                } catch (e) {
-                    console.error("Simple Clock: Could not read settings. Resetting.", e);
+            const configVersion = CONFIG.SETTINGS_STORAGE_KEY;
+            const storedSettingsJSON = localStorage.getItem(this.storageKey);
+
+            if (!storedSettingsJSON) {
+                return {};
+            }
+
+            let storedSettings;
+            try {
+                storedSettings = JSON.parse(storedSettingsJSON);
+            } catch (e) {
+                console.error("Simple Clock: Could not read settings. Resetting.", e);
+                return {};
+            }
+
+            if (configVersion !== null && configVersion !== "") {
+                if (storedSettings._key !== configVersion) {
+                    console.log(`Simple Clock: Settings version mismatch (config: "${configVersion}", stored: "${storedSettings._key || 'none'}"). Resetting user settings.`);
                     return {};
                 }
             }
-            return {};
+
+            delete storedSettings._key;
+            return storedSettings;
         }
 
         _saveSettings() {
             try {
-                localStorage.setItem(this.storageKey, JSON.stringify(this._settings));
+                const settingsToSave = { ...this._settings };
+
+                settingsToSave._key = CONFIG.SETTINGS_STORAGE_KEY;
+
+                localStorage.setItem(this.storageKey, JSON.stringify(settingsToSave));
             } catch (e) {
                 console.error("Simple Clock: Could not save settings.", e);
             }
@@ -219,8 +241,8 @@
             #${this.id}-overlay .sc-header a:hover { opacity: 1; }
 
 			#${this.id}-overlay .sc-scrollable-area {
-				flex: 1; /* NY: Tvinger dette elementet til å fylle resten av høyden */
-				overflow-y: auto; /* Beholder scroll hvis innholdet er for stort */
+				flex: 1;
+				overflow-y: auto;
 				padding: 15px 25px 25px;
 			}
             #${this.id}-overlay label {
@@ -250,7 +272,6 @@
                 color: var(--color-1, #111);
                 transform: rotate(90deg);
             }
-            /* Styling for Sliders (fra visualeq) */
             .sc-range-slider {
                 -webkit-appearance: none; appearance: none;
                 width: 100%; height: 14px;
@@ -421,11 +442,11 @@
             return dateString;
         }
 
-        applyStyles() { /* Implemented by subclasses */ }
-        update(now, useUTC, syncStatus) { /* Implemented by subclasses */ }
-        updateSize() { /* Implemented by subclasses */ }
+        applyStyles() {}
+        update(now, useUTC, syncStatus) {}
+        updateSize() {}
         getSettingsHTML() { return ''; }
-        applySettingsFromModal() { /* Implemented by subclasses */ }
+        applySettingsFromModal() {}
 
         _getThemeSettingsHTML(settingKey) {
             const currentColorName = this.settings.get(settingKey, CONFIG.DEFAULT_COLOR_NAME);
